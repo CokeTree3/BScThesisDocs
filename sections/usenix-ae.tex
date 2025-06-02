@@ -18,81 +18,56 @@ optional sections where those do not apply to your artifact.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Abstract}
-{\em [Mandatory]}
 {\em Provide a short description of your artifact.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Description \& Requirements}
 
-\textit{[Mandatory] This section should list all the information necessary to
-recreate the same experimental setup you have used to run your artifact. Where
-it applies, the minimal hardware and software requirements to run your artifact.
-It is also very good practice to list and describe in this section benchmarks
-where those are part of, or simply have been used to produce results with, your
-artifact.}
+\textit{Both the development and evaluation of the hypervisor detection technique mitigation methods were carried out
+on a Microsoft Windows 10 22H2 bare metal system as the host system, with a 10th generation Intel Core\textsuperscript{TM} CPU which supports VT-x hardware virtualization feature.
+The virtualized guest system was run on this host using a VMWare Workstation 16 hypervisor with nested virtualization support enabled.
+This guest system was used to run HyperDbg’s hypervisor and perform all evaluation and testing. Development of the transparency features in HyperDbg was based on its 0.13.0 release version. }
 
 \subsubsection{Security, privacy, and ethical concerns}
-\textit{[Mandatory] Describe any risk for evaluators while executing your
-artifact to their machines security, data privacy or others ethical concerns.
-This is particularly important if destructive steps are taken or security
-mechanisms are disabled during the execution.}
+\textit{The containerized nature of virtual machines adds a layer of security(cite) to a bare metal system that is used as the host for malware analysis.
+During this project, no actual malware samples were tested, only non-malicious parts of them, so full host system safety cannot be guaranteed from this paper.
+To be able to run HyperDbg’s hypervisor, Windows Driver Signature Enforcement security feature as well as VBS(Virtualization Based Security) must be disabled on the guest system.
+This allows the loading of unsigned drivers, which HyperDbg’s hypervisor driver is, but it also allows any other process to load their unsafe drivers, 
+exposing the system to a much lower level and harder to detect malware attacks. HyperDbg itself, including the features implemented as part of this paper, are open source and available under the GNU GPL v3.0 copyleft license.}
 
 \subsubsection{How to access}
-{\em [Mandatory]} \textit{Describe here how to access your artifact. If you are
-applying for the Artifacts Available badge, the archived copy of the artifacts
-must be accessible via a stable reference or DOI. For this purpose, we recommend
-Zenodo, but other valid hosting options include institutional and
-third-party digital repositories (e.g., FigShare, Dryad, Software
-Heritage, GitHub, or GitLab — not personal webpages). For repositories that can
-evolve over time (e.g., GitHub), a stable reference to the evaluated version
-(e.g., a URL pointing to a commit hash or tag) rather than the evolving version
-reference (e.g., a URL pointing to a mere repository) is required. Note that the
-stable reference provided at submission time is for the purpose of Artifact
-Evaluation. Since the artifact can potentially evolve during the evaluation to
-address feedback from the reviewers, another (potentially different) stable
-reference will be later collected for the final version of the artifact (to be
-included here for the camera-ready version).}
+\textit{Access to the developed transparency features is freely available on GitHub, as a commit to the HyperDbg project. 
+Individual commits to intermediate feature implementations can also be provided at links:...  
+(Future unlimited access can only be guaranteed as long as GitHub … )}
 
 
 \subsubsection{Hardware dependencies}
-{\em [Mandatory]} \textit{Describe any specific hardware features required to
-evaluate your artifact (CPU/GPU/FPGA, vendor, number of processors/cores,
-microarchitecture, interconnect, memory, hardware counters, etc). If your
-artifact requires special hardware, please provide instructions on how to gain
-access to the hardware. For example, provide private SSH keys to access the
-machines remotely. Please keep in mind that the anonymity of the reviewers needs
-to be maintained and you may not collect or request personally identifying
-information (e.g., email, name, address). [Simply write "None." where this does
-not apply to your artifact.]}
+\textit{To be able to evaluate the hypervisor transparency features implemented as part of this paper.
+The system running the hypervisor driver must have an Intel x64 CPU which supports VT-x and EPT technologies. As of writing this paper, AMD CPUs are not supported.
+Both the host and guest systems should also have at least a serial port each that are connected together, this can be a physical connection or a virtual one in case of nested virtualization usage.}
 
 \subsubsection{Software dependencies}
-{\em [Mandatory]} \textit{Describe any specific OS and software packages
-required to evaluate your artifact. This is particularly important if you share
-your source code and it must be compiled or if you rely on some proprietary
-software that you cannot include in your package. In such a case, you must
-describe how to obtain and to install all third-party software, data sets, and
-models. [Simply write "None." where this does not apply to your artifact.]}
+\textit{Both the host and guest systems must be running the 64 bit version of Microsoft Windows operating system,
+a certain release version is not specified, but testing was done, and correct operations can only be guaranteed, on Windows 10 and 11.
+HyperDbg can be obtained as a compiled software, so no compilation is needed. To be able to load the hypervisor driver of HyperDbg,
+Driver Signature Enforcement feature needs to be disabled, one of the methods, and the one that was used during the evaluation section, involves the use of a third party tool WinDbg(link), but this is not required.}
 
 \subsubsection{Benchmarks}
-{\em [Mandatory]} \textit{Describe here any data (e.g., data-sets, models,
-workloads, etc.) required by the experiments with this artifact reported in your
-paper.} \textit{[Simply write "None." where this does not apply to your
-artifact.]}
+\textit{None}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Set-up}
 
-{\em [Mandatory]} \textit{This section should include all the installation and
-configuration steps required to prepare the environment to be used for the
-evaluation of your artifact.}
+\textit{For this example evaluation, the nested virtualization approach is chosen, in this case the guest system on which the evaluation will be performed,
+is a VMWare Workstation 16 virtual machine running Microsoft Windows 10 22H2. This is assumed to already be set up and in a working state. The precompiled HyperDbg package was used.}
 
 \subsubsection{Installation}
-{\em [Mandatory]} \textit{Instructions to download and install dependencies as
+\textit{Instructions to download and install dependencies as
 well as the main artifact. After these steps the evaluator should be able to run
 a simple functionality test.}
 
 \subsubsection{Basic Test}
-{\em [Mandatory]} \textit{Instructions to run a simple functionality test. Does
+\textit{Instructions to run a simple functionality test. Does
 not need to run the entire system, but should check that all required software
 components are used and functioning fine. Please include the expected successful
 output and any required input parameters.}
@@ -168,7 +143,7 @@ an example:}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Notes on Reusability}
 \label{sec:reuse}
-{\em [Optional]} \textit{This section is meant to optionally share additional
+\textit{This section is meant to optionally share additional
 information on how to use your artifact beyond the research presented in your
 paper. In fact, a broader objective of an artifact evaluation is to help you
 make your research reusable by others.}
@@ -177,6 +152,10 @@ make your research reusable by others.}
 would help others re-use your artifact, like, for example, scaling down/up
 certain components of your artifact, working on different kinds of input or
 data-set, customizing the behavior replacing a specific module/algorithm, etc.}
+\textit{The hypervisor transparency features developed as part of this paper are only a small portion
+of the numerous ways that the presence of hypervisors can be detected. As with most cybersecurity development, 
+full security and protection cannot be guaranteed. The development was done in a highly modular and expandable fashion, 
+to allow future additions and improvements to hypervisor transparency in HyperDbg, as more mitigation methods are developed and new ways to detect hypervisors are discovered. }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

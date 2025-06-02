@@ -1,140 +1,50 @@
 \section{Introduction}\label{s:intro}
 
-\stress{Think before you write, be careful how you write, and take feedbacks
-seriously}~\cite{Heiser-WebArticle2022}.
+Modern malware is getting increasingly more complex and advanced. 
+And with its constantly changing internals, the ability to understand the inner workings and develop protections against it, is an increasingly difficult task. 
+One commonly used method to safely detect its presence or to run and inspect it, is to deploy the malware inside a virtual machine, a virtualized environment, managed by a virtual machine monitor, 
+commonly known as a hypervisor, that adds an abstraction layer over hardware isolating the environment from direct hardware access and from any other environments running on the same bare metal system. 
+Modern virtualization relies on hardware level CPU architectures implemented by both Intel\textsuperscript{\tiny\textregistered} VT-x\texttrademark and AMD\textsuperscript{\tiny\textregistered} AMD-V\texttrademark. 
+These features allow automation of low level virtualization elements and a more direct access to the hardware from the virtualized environment, allowing levels of performance that makes these environments usable.
 
+Virtualization and the use of hypervisors can be a really useful tool for process disassembly and analysis, as it allows kernel level view of the execution flow and direct access to the instructions that are executed on the CPU.
+Another benefit of this hypervisor assisted malware analysis is that hypervisors can operate externally, at a lower privilege level than the guest operating system, 
+and system analysis at this level is by itself a lot more transparent and harder to detect from the user-space.
 
-This section includes some motivations behind the work, explicitly or implicitly
-highlights the research question, provides a high-level explanation of the
-solution, and describes the contributions.
+But it is not impossible. There exists a lot of different methods any process operating at the user-mode level can detect that the environment is virtualized. 
+Some detection methods involve specific CPU instruction and feature tests, some use precise timing data between events and others might use the register and memory access patterns. 
+Malware and other programs can use these techniques to detect the presence of a hypervisor and choose to execute different code or even nothing at all. And in the case of malware, 
+this can mean that when an attempt to inspect the execution of the malicious code is made within the virtualized environment, no malicious code is actually deployed and the malware can stay hidden, evading any attempts at disassembly or detection.
 
+Another vector more advanced hypervisor detection methods use involve testing for specific hypervisor vendors. Most of the commonly used consumer hypervisors, like VirtualBox\texttrademark and VMWare Workstation\texttrademark, 
+add a lot of drivers, files and other data inside the guest operating systems, mostly to improve performance or compatibility, especially on frequently used and popular operating systems like Microsoft Windows. 
+All of this data is in some way necessary or convenient, but for malware analysis, the presence of such data is just another way the malware can reliably detect the virtual environment and evade the analysis attempts.
 
-\parai{Makefile.}
-%
-It is typical to build a PDF from the \LaTeX{} sources using \texttt{make}, but
-resist the temptation to fill the \texttt{Makefile} with complex and unnecessary
-rules or recipes.
-%
-You only need one line, where you invoke \texttt{latexmk}.
-%
-This template should also come bundled with a \texttt{Makefile}, which should
-suffice in virtually all scenarios.
+From the hypervisor's point of view, attempts to detect its presence can also be detected. The low level position of hypervisors allows them to not just observe all execution happening on the guest system, 
+but also inject code into the guest and change its behaviour. This allows for mitigations to exist that can defeat most attempts at detecting the virtual environment.
 
+In this paper hypervisor detection methods were researched and mitigations for these methods were designed within a hypervisor. To implement these hypervisor detection mitigation features, 
+a hypervisor based debugging tool HyperDbg was chosen as the platform. HyperDbg is a hypervisor based Windows debugging tool, that provides kernel level debugging of a virtualized system which attempts to be as transparent to the guests as possible.
+While there are many different ways processes can detect the virtualized environment they are deployed in, the design developed in this paper only focused only on 2 general detection vectors, 
+CPU level instructions and structures, and guest OS kernel level system calls.
 
-\begin{figure}[tbh]
-    %% The macro `\onecolgrid' is defined in `vusec.sty'
-    %% NOTE: The suffix "./figs/" is implicitly included for this relative path.
-    \includegraphics[width=\onecolgrid]{cache-by-app}
-    %% Labels should immediately follow caption, to keep latex quiet.
-    \figcap{Simple one-column figure. Please include a brief explanation or
-    takeaway.}\label{fig:1col}
-\end{figure}
+The mitigation techniques designed were implemented into HyperDbg’s transparency mode. 
+These techniques were then tested against a selection of publicly available virtual machine detection tools that combine many of the common methods for detecting hypervisors into one program. The overhead introduced by the implementation was also evaluated, measuring execution time with and without hypervisor transparency mode enabled, as well as evaluating the efficiency of the designed system in evading detection attempts when compared to ScyllaHide, an anti-anti-debugging tool, which features a similar implementation in evading debugger detection.
+The research of this paper is focused on the Microsoft Windows operating system, as at the time of writing this project, this was the only guest OS supported by HyperDbg.
 
-\parai{Figures.}
-%
-Do not include figures that you do not refer to or discuss in the text.
-%
-Generate high-quality figures (Fig.~\ref{fig:1col})---think PDF or EPS.
-%
-With the number of tools and libraries that are available today for generating
-beautiful plots, there is no excuse for producing ugly plots.
-%
-Figure caption must go at the bottom of a figure (Fig.~\ref{fig:3col}), and it
-is also a good place to highlight the key takeaway of that figure.
-%
-Avoid using the position parameters `p' and `!', unless you are absolutely sure
-that is exactly what you want.
-
-\begin{figure*}[th]
-    %% The macro `\threecolgrid' is defined in `vusec.sty'
-    \begin{subfigure}[t]{\threecolgrid}
-        %% NOTE: The suffix "./figs/" is implicitly included for these relative paths.
-        \includegraphics[width=\linewidth]{three-col/speed_index}
-        \sfigcap{}\label{fig:3col-a}
-    \end{subfigure}
-    \begin{subfigure}[t]{\threecolgrid}
-        %% NOTE: You do not have to mention the extension.
-        %% (The example figures are in PDF format.)
-        \includegraphics[width=\linewidth]{three-col/plt_ranks_diff}
-        \sfigcap{}\label{fig:3col-b}
-    \end{subfigure}
-    \begin{subfigure}[t]{\threecolgrid}
-        \includegraphics[width=\linewidth]{three-col/mimes}
-        \sfigcap{}\label{fig:3col-c}
-    \end{subfigure}
-    %% Labels should immediately follow caption, to keep latex quiet.
-    \figcap{Generate clear and beautiful figures (in PDF) that can be rendered side by side while still being easy to read and interpret. Choose colors wisely from the colorbrewer2.org website.}\label{fig:3col}
-\end{figure*}
-
-
-\begin{table}[tb]
-    \centering
-    \tabcap{A simple table describing the characteristics of a data set or the
-    results of an experiment.}\label{tab:sample}
-    \taburulecolor{black!45}
-    \begin{tabu}{c|c|r|r|r|r}
-        \toprule
-        \multirow{2}{*}{\thead{Char.}} &
-            \multirow{2}{*}{\thead{\#samples}} &
-            \thead{Count} &
-            \multicolumn{3}{c}{\thead{Perf. Score}}\\
-        &
-            &
-            \thead{of items} &
-            \thead{X} & \thead{Y} & \thead{Z} \\
-        \midrule
-        \stress{P}
-            & 214 & 56 & 9 & 23 & 24 \\
-        \stress{Q}
-            & 117 & 27 & 7 & 10 & 10 \\
-        \stress{R}
-            & 222 & 11 & 6 & 4 & 1 \\
-        \stress{S}
-            & 187 &  9 & 1 & 6 & 2 \\
-        \stress{T}
-            & 180 & 16 & 7 & 5 & 4 \\
-        \bottomrule
-    \end{tabu}
-
-\end{table}
-
-\parai{Tables.}
-%
-The caption must go at the top of the table (Tab.~\ref{tab:sample}).
-%
-Do not use \texttt{\textbackslash{}hrule}.
-%
-Use \texttt{\textbackslash{}toprule} above the heading,
-\texttt{\textbackslash{}midrule} below the heading, and
-\texttt{\textbackslash{}bottomrule} below the last row.
-%
-You could also use \texttt{\textbackslash{}hrule} as a row separator.
-%
-Right align numerical values, and use math-mode for (large) numerical values to
-force \LaTeX{} to use monospaced fonts and ensure right-alignment functions as
-expected.
-
-
-We summarize our contributions as follows.
+The contributions made by this paper are as follows.
 
 \case{}
-%
-contribution1
+Design of hypervisor detection mitigation features that obscure attempts at detecting the presence of a virtualized environment.
 
 \case{}
-% 
-contribution2
+An evaluation on feasibility of these features at successfully hiding the hypervisor and evading anti-hypervisor detections.
 
 \case{}
-% 
-contribution3
+An implementation of these features into a hypervisor in a modular and dynamic transparency mode.
 
 \case{}
-% 
-contribution4
-
-Depending on your degree program and/or supervisor, you may need to furnish the
-“Artifact Appendix” (\S\ref{s:appendix}).
+Advancing the development of HyperDbg, a hypervisor based debugging tool, enhancing its transparency.
 
 
 %%% Local Variables:
