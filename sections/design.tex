@@ -1,22 +1,45 @@
-\section{Design}\label{s:design}
-
-In this section, you would provide a high-level description of the system or
-solution and explain your design choices.
+\section{Design and Implementation}\label{s:design}
 
 \subsection{General Overview}
-General overview of the development/testing environment, how the design of the implementation was decided during the project
+This chapter describes the design choices of the mitigation methods in HyperDbg that were made during this project. The design was made for the development of HyperDbg, and focused on its transparency mode. 
+As already mentioned before in section~\ref{design_approach}, due to feasibility and time constraints, only a handful of the mitigations were developed. 
+These include return value adjustment of the CPUID instruction, behaviour modification of certain MSR accesses and the hooking and interception of Windows kernel system calls. 
+The implementation was done based on HyperDbg's 0.13.0 version, on a GitHub fork of the project\footnote{The repository of the forked HyperDbg project, where the implementation was done available at: \url{https://github.com/CokeTree3/HyperDbgThesis}}.
+
+The design was made to be deployable on any system, but the implementation and testing, and thus a guarantee of reliability, was performed on a Windows 10(22H2) bare metal system running on an Intel CPU that supports VT-x hardware virtualization. 
+The deployment and further evaluation was performed in a nested virtualization environment, where HyperDbg hypervisor driver was deployed over a VMWare Workstation 16 virtual machine. 
+This VM was running Windows 10 version 22H2 as the operating system. For reliability of the design, all testing and evaluation was also performed on an identical virtual machine, but one that is running Windows 11 version 24H2.
 
 \subsection{Implementation \& Design}
-idk, talk about the chosen methods that were implemented
+Talk about the chosen methods that were implemented
 \subsubsection{CPUID}
-CPUID mitigation design
-\subsubsection{Model Specific Registers}
-MSR access mitigation design
-\subsubsection{Windows systemcalls}
-Implementation of mitigations and the design of the approach relating to systemcalls
+As described by Microsoft\footnote{CPUID instruction description in terms of hypervisor discovery. Microsoft \url{https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/tlfs/feature-discovery}}, 
+there are 2 ways the CPUID instruction can be used to check hypervisor presence, reading the “hypervisor present” bit that is at 31 bit offset of the leaf 0x1.
+\begin{minted}[linenos,frame=single]{nasm}
+    MOV EAX, 0x1
+    CPUID
+\end{minted}
+Or by querying the 0x40000000 leaf for the vendor identifier and max defined leaf range above the 0x40000000 leaf. 
+\begin{minted}[linenos,frame=single]{nasm}
+    MOV EAX, 0x40000000
+    CPUID
+\end{minted}
+Without mitigations, after calling CPUID, registers EBX, ECX and EDX will contain the hypervisor vendor string, if it is set as such by the hypervisor.
+Both of these methods can be mitigated by intercepting the unconditional VM-exit caused by the CPUID instruction, and changing the return values in RAX, RBX, RCX and RDX registers. 
+By just unsetting the 'hypervisor present bit' in RAX, if the query request in RAX is 0x1, leaving RAX at value 0x4000000, to indicate no higher leaves are defined, and not setting the vendor identifier in the other registers.
 
-\subsection{Final system}
-Overview of the achieved implementation, talk about the tradeoffs of the design/ advantages. Flow into testing and evaluation
+\subsubsection{Model Specific Registers}
+Similarly, MSR accesses can also be mitigated. Intel defines MSR's in the range 40000000H - 4000FFFFH as reserved~\cite[Volume 4]{Intel-SDM2025} and so they are guaranteed to not be used by hardware. 
+Due to this, Microsoft defines them as “Synthetic model specific registers”~\cite{microsoft_hv_interface_reqs}, and consumer hypervisors that conform to the Hyper-V \stress{Hv\#1} interface must define some MSR's in this range. 
+In a bare metal system any access to an undefined MSR causes a general protection error (\stress{\#GP}). In the design, this behaviour was emulated, 
+so whenever the transparency mode is enabled within HyperDbg, any reads or writes to/from this range, will cause a \stress{\#GP} error to be injected to the guest.
+
+\subsubsection{Windows system call interception}\label{syscall_interception}
+Implementation and the design of the approach chosen to intecept system calls from the kernel-mode
+\subsubsection{Modification of system call behaviour}
+The approach taken for modifying Windows system calls with user-mode callers, to hide hypervisor presence
+\subsection{Final design}
+Overview of the achieved implementation, talk about the tradeoffs of the design/advantages. %Flow into testing and evaluation
 
 
 

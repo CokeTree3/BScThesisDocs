@@ -5,6 +5,7 @@
 While hypervisors by design are not easily detectable, there still exist many ways to detect the presence of them from the user-mode level. 
 This paper could not cover all of the possible detection ways, but it does touch on the most commonly used methods.
 
+%% Might look better to add a subsection for each of these parai sections(CPUID and RDTSC combined as x86 ASM instructions)
 \parai{CPUID}
 One of the most commonly used detection methods involve querying the CPUID instruction, defined in x86 architecture. 
 This instruction returns information about the CPU and has multiple fields in the return data from which hypervisor identifiable information can be obtained. 
@@ -31,7 +32,7 @@ As seen in Figure~\ref{fig:rdtsc_overhead}, the CPU cycle count it takes to exec
     \figcap{Average cycle count of executing CPUID instruction in 4 different environments. VBS was tested on the same bare metal system and HyperDbg was run on top of a VMware system}\label{fig:rdtsc_overhead}
 \end{figure}
 
-It's also visible that HyperDbg's implementation of the CPUID instruction handler or the general VM-exit handler is a lot less efficient than VMWare's implementation as the cycle count overhead is over 5 times larger. 
+It's also visible that HyperDbg's implementation of the CPUID instruction handler or the general VM-exit handler is a lot less efficient than VMWare's implementation, as the cycle count overhead is over 5 times larger. 
 This detection method is reliable, as the overhead measurements are done in cycle count not time offset, and hard to defeat from the hypervisor as many genuine processes rely on the RDTSC 
 instruction and the detection is done as a pattern not a singular query, making detecting the attempt of hypervisor detection unreliable and hard to implement~\cite{hypervisor-detection-timing-attacks}. 
 The viability of this detection method, however, is no longer that high. In recent Windows operating system releases Microsoft has introduced Virtualization Based Security(VBS) feature~\cite{windows-vbs} 
@@ -113,7 +114,7 @@ Some other detection vectors might include checking I/O and other hardware devic
 Mitigating all possible detection methods is near impossible, but at the same time, implementing and executing all these virtualization detection methods is inefficient in both time and space and can cause higher rates of false positives.
 
 
-\subsection{Design approach}
+\subsection{Design approach}\label{design_approach}
 Due to the complexity of the mitigations for some of these detection methods and the scope of this paper, only 3 general approaches to detection were handled, CPUID queries, MSR access patterns and Windows system calls. 
 The hypervisor detection mitigation features were implemented into HyperDbg's transparency mode. 
 
