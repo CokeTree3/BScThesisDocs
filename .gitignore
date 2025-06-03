@@ -8,7 +8,10 @@
 *.fdb_latexmk
 *.fls
 *.gz
+*.minted
+*.xcp
 auto/
 .DS_Store
-Icon
+Icon
+
 thesis.pdf
