@@ -1,4 +1,4 @@
-\section{Design and Implementation}\label{s:design}
+\section{Transparency Feature Design}\label{s:design}
 
 \subsection{General Overview}
 This chapter describes the design choices of the mitigation methods in HyperDbg that were made during this project. The design was made for the development of HyperDbg, and focused on its transparency mode. 
@@ -10,8 +10,7 @@ The design was made to be deployable on any system, but the implementation and t
 The deployment and further evaluation was performed in a nested virtualization environment, where HyperDbg hypervisor driver was deployed over a VMWare Workstation 16 virtual machine. 
 This VM was running Windows 10 version 22H2 as the operating system. For reliability of the design, all testing and evaluation was also performed on an identical virtual machine, but one that is running Windows 11 version 24H2.
 
-\subsection{Implementation \& Design}
-Talk about the chosen methods that were implemented
+\subsection{Feature Design}
 \subsubsection{CPUID}
 As described by Microsoft\footnote{CPUID instruction description in terms of hypervisor discovery. Microsoft \url{https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/tlfs/feature-discovery}}, 
 there are 2 ways the CPUID instruction can be used to check hypervisor presence, reading the “hypervisor present” bit that is at 31 bit offset of the leaf 0x1.
@@ -35,11 +34,109 @@ In a bare metal system any access to an undefined MSR causes a general protectio
 so whenever the transparency mode is enabled within HyperDbg, any reads or writes to/from this range, will cause a \stress{\#GP} error to be injected to the guest.
 
 \subsubsection{Windows system call interception}\label{syscall_interception}
-Implementation and the design of the approach chosen to intecept system calls from the kernel-mode
+For the interception and modification of Windows system calls, the approach chosen was to insert an EPT page hook (A feature already implemented in HyperDbg before this paper) 
+at the entry point of Windows system call handler function KiSystemCall64, which is the function that performs the privilege level swap between user-mode and kernel-mode. 
+Access to the location of this function is obtained from the IA32\_LSTAR MSR. 
+This allows HyperDbg to intercept all calls to this function by causing an unconditional VM-exit and filter the system calls based on their system call number. 
+The call number is stored in the RAX register as set up by the user-mode system call wrapper functions in the \stress{NTDLL} library~\cite{ntdll-lib}. The general style of these 
+wrapper functions are as shown in Listing~\ref{lst:syscall-wrapper}, but with the system call number changed to the appropriate one.
+This disassembly also shows that the wrappers move the second argument of the system call, as defined by the used x64 fastcall calling convention, 
+to R10 from the standard RCX register. This was a detail that was considered during the development.
+
+At the point when the EPT hook is triggered, the system has just transferred the context to kernel-mode and no execution relating to the requested system call has been done. 
+To get to a point in the execution path where data has been written to any memory buffers or the return values have already been set, 
+requires returning control back to the guest system and intercepting the execution path once more, before the control is passed back to the calling user-mode process or API function. 
+The approach chosen was to set the trap flag in the guest-mode RFLAGS register for the specific thread, which during the interception point is stored on R11. 
+Once the execution returns to user-mode via the SYSRET instruction, and the user-mode RFLAGS are restored, the first instruction will immediately trigger a software interrupt, due to the TRAP flag
+being set. HyperDbg catches this interrupt and gives an opportunity to access and modify the return value the user-mode process will be receiving from the system call. 
+As many system calls also provide data, more than just a return value, at this point HyperDbg also can read and modify any memory buffers that were 
+passed as arguments when the system call was invoked. This callback approach to system call interception allows HyperDbg to filter and only intercept 
+the offending system calls, Table~\ref{tab:syscalls} and greatly improves performance over intercepting and causing VMX mode changes multiple times on every system call made.
+
 \subsubsection{Modification of system call behaviour}
-The approach taken for modifying Windows system calls with user-mode callers, to hide hypervisor presence
+Once the system calls can be intercepted, the chosen non-transparent calls are filtered and an entry handler for each one can be created. 
+These functions execute at the entry point of the system call execution in the kernel, as triggered by the EPT page hook. 
+These handlers range from simply setting the trap flag for all calls to the specific system call, to reading user-mode buffers written by the caller process, 
+filtering the kernel access calls even further. The handler might also corrupt some register values, to trigger an error code to be generated by the kernel 
+instead of executing the requested data query. As an example, the Windows system call NtQueryAttributesFile\footnote{NtQueryAttributesFile system call. Microsoft. \url{https://learn.microsoft.com/en-us/windows/win32/devnotes/ntqueryattributesfile}}, 
+which retrieves basic information on a specific file or a directory, requires 2 arguments: an input structure and a buffer to write the queried information to.
+A process attempting to detect a hypervisor might execute this system call on a number of common files that commercial hypervisor vendors might add to a guest system, 
+as well as driver files present in the system. The approach taken for mitigating this is to report errors when a query for a known hypervisor specific file is being accessed. 
+To achieve this, the system call entry handler has to read the input structure from the user-mode virtual pointer, check if the call is a query for these \stress{"bad"} files, 
+and only then deploy the mitigation. Which in this case is to set the trap flag and resume the kernel execution, 
+as the actual mitigation has to happen after the kernel returns to user-mode.
+
+Once the kernel executes the SYSRET instruction, and returns to user-mode, the inserted trap flag causes another VM-exit and based on the system call number stored in a list, 
+another handler can be called for this callback. At this point in the execution path of system calls, the return value has already been set on RAX and the user-mode buffers 
+have been written to, if required, by the kernel. This allows the transparent mitigation handlers to read these buffers and modify any data in them 
+that could reveal hypervisor presence, like removing active processes and loaded drivers from their respective lists, 
+or spoofing the vendor identification in Windows registry key or firmware data.
+The mitigations take place in VMX root mode, operating at level -1 and since these pointers given in the arguments are from the calling processes (level 3) virtual address space, 
+accessing them directly is not possible, so a translation layer needs to be added. The method chosen was to read and copy the data from the translated physical address to a spare memory buffer, 
+either on the stack or to an allocated non-paged memory on the heap. From there, modifications of the data in these buffers could be performed, as required based on the system call, 
+and then written back to the user-mode buffer physical address.
+The return values are aalso spoofed at this point, if needed, by updating RAX register value. In most cases is is to set the value as an error code instead of the success code of 0x0. 
+
+NtQuerySystemInformation is a system call that can retrieve many types of information on the system, the query is defined by an argument, 
+a class value from the \stress{SYSTEM\_INFORMATION\_CLASS} enumeration defined in the NT API~\cite{ntdll-lib}. 
+While not all of the class data could contain hypervisor revealing data, some of them do. The designed system call interception system mitigates many 
+but not all of the query classes. Seen in Table, are a list of the \stress{SYSTEM\_INFORMATION\_CLASS} classes that could be used for hypervisor detection.
+
+\begin{table}[tb]
+    \centering
+    \tabcap{Some SYSTEM\_INFORMATION\_CLASS classes with a possible use in hypervisor detection}\label{tab:QSI-classes}
+    \taburulecolor{black!45}
+    \begin{tabu}{l|c|c}
+        \toprule
+        \multirow{2}{*}{\thead{Name}} &
+            \thead{Class} &
+            \thead{Implemented} \\
+        &
+            \thead{number} &
+            \thead{in HyperDbg}\\
+        \midrule
+        SystemProcessInformation
+            & 0x05 & \checkmark \\
+        SystemModuleInformation
+            & 0x0B & \checkmark \\
+        SystemKernelDebuggerInformation
+            & 0x23 & \checkmark \\
+        SystemFirmwareTableInformation
+            & 0x4C & \\
+        SystemHypervisorInformation
+            & 0x5B&\\
+        SystemHypervisorDetailInformation
+            & 0x9F &\\
+        SystemProcessIdInformation
+            & 0x58 &\\
+        SystemCodeIntegrityInformation
+            & 0x67 & \checkmark \\
+        SystemHandleInformation
+            & 0x10 &\\
+        \bottomrule
+    \end{tabu}
+
+\end{table}
+
+The values and the returned structures were obtained from the NT API documentation provided by the \stress{System Informer} project\footnote{Native API online documentation, based on the System Informer. \url{https://ntdoc.m417z.com/}}.
+
+Multiple hypervisor detection methods commonly used, rely on querying for the system firmware and vendor data. On Windows many of these queries are carried out with system calls, 
+allowing HyperDbg to intercept them. To appear genuine, when the transparency mode is enabled, a random genuine vendor is chosen from a preset list of numerous genuine computer system and component vendors. 
+Any queries for data through system calls, that contain hypervisor vendor data, from any process will always report back the same spoofed vendor data, bypassing any hypervisor checks done by the user process.
+
+In the context of Windows, one commonly used approach for obtaining system information is by using the Windows Management Instrumentation(WMI)\footnote{Windows Management Instrumentation documentation. Microsoft. \url{https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page}}.
+This API provides the user an interface through which to query and modify many aspects of the operating system. 
+Importantly, it can be used in parallel to direct system calls to obtain system information which might reveal the hypervisor~\cite{graeber2015abusing}.
+For this paper, WMI related detection methods did not have mitigations developed as the layout of the WMI structure is relatively spread out and 
+does not interact with the kernel through an easily detectable system call, frequently not going through the kernel at all~\cite{wmi-structure}.
+
 \subsection{Final design}
-Overview of the achieved implementation, talk about the tradeoffs of the design/advantages. %Flow into testing and evaluation
+The designed system of hypervisor transparency is capable of intercepting 3 common detection vectors - CPUID instruction queries, accesses of certain MSR regions and Windows system calls - 
+suppressing the ability for any user process or malware to successfully detect that they are running in a virtualized system and changing their execution paths. 
+
+The design allows for a modular implementation, where each of the different mitigation handlers are independent to the other ones, 
+while also being dynamic and allowing the transparency to be toggled on or off at runtime, not requiring a system restart for the guest.
+
 
 
 

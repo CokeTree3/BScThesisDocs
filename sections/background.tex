@@ -1,10 +1,25 @@
 \section{Background}\label{s:background}
 
-This section provides the necessary context to help the reader understand the
-remainder of the thesis.
+%%% This section provides the necessary context to help the reader understand the
+%%% remainder of the thesis.
 
+%%%(most are lvl2, HyperDbg is lvl1)
+%%%Theory behind virtualization, that it can be detected. mention of the use in malware analysis
 
-Theory behind virtualization(most are lvl2, HyperDbg is lvl1), that it can be detected. mention of the use in malware analysis
+Hypervisors work by adding an emulation layer between the guest system and the hardware. A type 1 hypervisor has to manage all hardware accesses a system needs, 
+that includes CPU cores, memory access and I/O operations. The virtual CPU, or vCPU, managed by the hypervisor, has each of its cores mapped or dynamically assigned 
+to the hardware CPU cores, I/O and storage is handled by creating custom drivers and mapping them to virtual devices that translate the I/O operations to the hardware 
+devices, and the memory is managed via Second Level Address Translation or SLAT. SLAT is a memory paging technology used to map guest system virtual addresses 
+into the physical memory. Modern implementations use hardware virtualization support to assist paging by adding more layers to the address translation, as well as 
+improve the overall performance and transparecy by moving a lot of the virtualization managment to the hardware. 
+Both AMD and Intel have their own implementations of SLAT, Nested Page Tables (NPT) and Extended Page Tables (EPT) respectively.
+These features allow the hypervisor to manage the memory in such a way that avoids massive software overheads and improves the guest systems performance 
+while still staying nearly undetectable. 
+
+The VMM runs on ring level -1 known as VMX root mode while the guest software runs on lower privilege levels, 
+in VMX non-root mode. The transitions between non-root and root modes are called vm-exits and vm-entries, they transfer executing between the guest and the hypervisor. 
+VM-exits can be triggered conditionally, controlled by the hypervisor and can be changed, and unconditionally, by CPU instructions that will always cause a vm-exit. 
+The hypervisor needs to handle all of the vm-exits to keep the guest system operational.
 
 
 %%% Local Variables:
