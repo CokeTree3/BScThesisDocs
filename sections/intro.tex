@@ -2,7 +2,7 @@
 
 Modern malware is getting increasingly more complex and advanced.
 And with its constantly changing internals, the ability to understand the inner workings and develop protections against it, is an increasingly difficult task. 
-Compiled binaries are almost always obfuscated(cite) making static analysis hard, so dynamic analysis is preferred. But performing dynamic analysis requires a safe environment 
+Compiled malware binaries are frequently obfuscated making static analysis hard, so dynamic analysis is preferred~\cite{Leon2021}. But performing dynamic analysis requires a safe environment 
 to deploy the malware. One commonly used method for dynamic analysis and malware detection, is to deploy the malware inside a virtual machine, a virtualized environment, managed by a virtual machine monitor, 
 commonly known as a hypervisor, that adds an abstraction layer over hardware isolating the environment from direct hardware access and from any other environments running on the same bare metal system. 
 Modern virtualization relies on hardware level CPU architectures implemented by both Intel\textsuperscript{\tiny\textregistered} VT-x\texttrademark and AMD\textsuperscript{\tiny\textregistered} AMD-V\texttrademark. 
