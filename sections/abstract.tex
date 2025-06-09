@@ -1,23 +1,12 @@
-This first and short section includes a summary of the work.
-%
-A strong abstract highlights the research problem, which the thesis addresses,
-succinctly describes why the problem is worth pursuing, highlights the thesis's
-contributions towards addressing the problem.
+Dynamic analysis of malware is commonly performed in a virtualized environment, managed by a hypervisor. 
+This keeps it isolated from hardware and the analysis can stay hidden and detached from the system. But the hypervisor is not completely hidden and malware using anti hypervisor 
+detection methods can still detect the virtual environment and evade analysis and detection. 
 
+In this paper we look into the hypervisor detection methods malware use as well as design mitigations for them.  
+We then integrate these mitigations into a transparency mode in HyperDbg, a debugging tool based on a hypervisor. With these mitigation features in HyperDbg, 
+we evaluate the effectiveness of them by deploying them against multiple hypervisor detection tools that compile numerous detection methods used by malware and execute them, 
+attempting to detect a hypervisor. We show that, while perfect transparency is not achieved, there is a noticeable improvement in hypervisor transparency.
 
-For more detailed instructions on writing a good thesis at the VU, consult the
-VUSec thesis guide~\cite{VUSec-WebArticle2022} or Animesh's
-notes~\cite{Trivedi-WebArticle2021}.
-%
-There are many excellent guides on technical writing (e.g., \cite{Jones-Talk2015, Heiser-Talk2018});
-please consult them to improve your writing.
-%
-We \stress{strongly recommend} that you read, at the very least, “The Elements
-of Style” by William Strunk Jr.~\cite{William-Strunk-Jr.-Book1918}.
-
-
-\stress{Start writing from \textbf{day one} of your project and keep refining}
-the document until the end.
 
 
 %%% Local Variables:
