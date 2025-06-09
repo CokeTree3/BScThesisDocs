@@ -7,20 +7,20 @@
 %%%Theory behind virtualization, that it can be detected. mention of the use in malware analysis
 
 Hypervisors work by adding an emulation layer between the guest system and the hardware. A type 1 hypervisor has to manage all hardware accesses a system needs, 
-that includes CPU cores, memory access and I/O operations. Hardware assisted virtualization features like Intel VT-x helps with this, greatly improving performance. 
+that includes CPU cores, memory access, and I/O operations. Hardware assisted virtualization features like Intel VT-x help with this, greatly improving performance. 
 The virtual CPU, or vCPU of the virtualized system, has each of its cores mapped or dynamically assigned to the hardware CPU cores, 
 I/O and storage is handled by creating custom drivers and mapping them to virtual devices that translate the I/O operations to the hardware devices. 
-The memory is managed via Second Level Address Translation or SLAT. SLAT is a memory paging technology used to map guest system virtual addresses 
-into the physical memory. Modern implementations use hardware virtualization support to assist paging by adding more layers to the address translation, as well as 
-improve the overall performance and transparecy by moving a lot of the virtualization managment to the hardware. 
+The memory is managed via Second Level Address Translation or SLAT. SLAT is a memory paging technology used to map virtual addresses from the guest system to physical memory. 
+Modern implementations use hardware virtualization support to assist paging by adding more layers to the address translation, as well as 
+to improve the overall performance and transparency by moving a lot of the virtualization managment to the hardware. 
 Both AMD and Intel have their own implementations of SLAT, Nested Page Tables (NPT) and Extended Page Tables (EPT) respectively.
 These features allow the hypervisor to manage the memory in such a way that avoids massive software overheads and improves the guest systems performance 
 while still staying nearly undetectable. 
 
-The VMM runs on ring level -1 known as VMX root mode while the guest software runs on lower privilege levels, 
-in VMX non-root mode. The transitions between non-root and root modes are called vm-exits and vm-entries, they transfer executing between the guest and the hypervisor. 
-VM-exits can be triggered conditionally, controlled by the hypervisor and can be changed, and unconditionally, by CPU instructions that will always cause a vm-exit. 
-The hypervisor needs to handle all of the vm-exits to keep the guest system operational.
+The VMM runs on ring level -1 known as VMX root mode, while the guest software runs on lower privilege levels, 
+in VMX non-root mode. The transitions between non-root and root modes are called VM-exits and VM-entries, they transfer executing between the guest and the hypervisor. 
+VM-exits can be triggered conditionally, controlled by the hypervisor and can be changed, and unconditionally, by CPU instructions that will always cause a VM-exit. 
+The hypervisor needs to handle all of the VM-exits to keep the guest system operational.
 
 
 %%% Local Variables:
