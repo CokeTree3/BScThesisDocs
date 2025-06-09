@@ -3,22 +3,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Artifact Appendix}
-\textit{This artifact appendix is meant to be a self-contained document which
-describes a roadmap for the evaluation of your artifact. It should include a
-clear description of the hardware, software, and configuration requirements. In
-case your artifact aims to receive the functional or results reproduced badge,
-it should also include the major claims made by your paper and instructions on
-how to reproduce each claim through your artifact. Linking the claims of your
-paper to the artifact is a necessary step that ultimately allows artifact
-evaluators to reproduce your results.}
-
-\textit{Please fill all the mandatory sections, keeping their titles and
-organization but removing the current illustrative content, and remove the
-optional sections where those do not apply to your artifact.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Abstract}
-{\em Provide a short description of your artifact.}
+{\em During this paper, multiple hypervisor detection mitigation approaches were discussed and designed. These mitigation methods were then implemented into HyperDbg, 
+developing the transparency mode of HyperDbg. The transparency features attempt to hide the HyperDbg hypervisor and any other virtualized environment HyperDbg has been nested on top of, 
+by intercepting and modifying the data a calling user process will receive and are deployed from HyperDbg during runtime without requiring system reboot.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Description \& Requirements}
@@ -29,7 +19,7 @@ The virtualized guest system was run on this host using a VMWare Workstation 16 
 This guest system was used to run HyperDbg's hypervisor and perform all evaluation and testing. Development of the transparency features in HyperDbg was based on its 0.13.0 release version. }
 
 \subsubsection{Security, privacy, and ethical concerns}
-\textit{The containerized nature of virtual machines adds a layer of security(cite) to a bare metal system that is used as the host for malware analysis.
+\textit{The containerized nature of virtual machines adds a layer of security to a bare metal system that is used as the host for malware analysis.
 During this project, no actual malware samples were tested, only non-malicious parts of them, so full host system safety cannot be guaranteed from this paper.
 To be able to run HyperDbg's hypervisor, Windows Driver Signature Enforcement security feature as well as VBS(Virtualization Based Security) must be disabled on the guest system.
 This allows the loading of unsigned drivers, which HyperDbg's hypervisor driver is, but it also allows any other process to load their unsafe drivers, 
@@ -52,7 +42,7 @@ Both the host and guest systems should also have at least a serial port each tha
 \textit{Both the host and guest systems must be running the 64 bit version of Microsoft Windows operating system,
 a certain release version is not specified, but testing was done, and correct operations can only be guaranteed, on Windows 10 and 11.
 HyperDbg can be obtained as a compiled software, so no compilation is needed. To be able to load the hypervisor driver of HyperDbg,
-Driver Signature Enforcement feature needs to be disabled, one of the methods, and the one that was used during the evaluation section, involves the use of a third party tool WinDbg(link), but this is not required.}
+Driver Signature Enforcement feature needs to be disabled, one of the methods, and the one that was used during the evaluation section, involves the use of a third party tool WinDbg \href{https://github.com/HyperDbg/HyperDbg/commit/2cc3da3daebd793fd56d5c370ef6da398efa6d29}{Link}, but this is not required.}
 
 \subsubsection{Benchmarks}
 \textit{None}
@@ -64,83 +54,81 @@ Driver Signature Enforcement feature needs to be disabled, one of the methods, a
 is a VMWare Workstation 16 virtual machine running Microsoft Windows 10 22H2. This is assumed to already be set up and in a working state. The precompiled HyperDbg package was used.}
 
 \subsubsection{Installation}
-\textit{Instructions to download and install dependencies as
-well as the main artifact. After these steps the evaluator should be able to run
-a simple functionality test.}
+\textit{To deploy the transparency features, only the guest VMWare system and HyperDbg is needed. The downloaded compiled HyperDbg package directory needs to be present on both the guest and host systems. 
+Once HyperDbg has been deployed, following its installation guide available at: \href{https://docs.hyperdbg.org/getting-started/build-and-install}{Link}, the transparency mode, 
+which contains the features developed, can be enabled by entering the "!hide" command in the CLI of the host system, and once the confirmation output is displayed, the hypervisor transparency has been enabled 
+and the control can be returned to the guest with the "g" command. Now any user-space process attempting to call the CPUID instruction or querying one of the intercepted system calls 
+will receive the mitigated output.}
 
 \subsubsection{Basic Test}
-\textit{Instructions to run a simple functionality test. Does
-not need to run the entire system, but should check that all required software
-components are used and functioning fine. Please include the expected successful
-output and any required input parameters.}
+\textit{The functionality of the hypervisor detection mitigation features can be tested by creating and running a simple program that queries the CPUID instruction with the EAX register set to 0x01
+ and then reading the 31st bit of the returned value in RAX. This is the "hypervisor present" bit and in a normal virtual environment this bit would be set, but the transparency features unsets it, 
+ to appear as if this is a bare metal system.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Evaluation workflow}
-{\em [Mandatory for Artifacts Functional \& Results Reproduced, optional for
-Artifact Available]} \textit{This section should include all the operational
+\textit{This section should include all the operational
 steps and experiments which must be performed to evaluate if your your artifact is
 functional and to validate your paper's key results and claims. For that
 purpose, we ask you to use the two following subsections and cross-reference the
 items therein as explained next.}
 
 \subsubsection{Major Claims}
-{\em [Mandatory for Artifacts Functional \& Results Reproduced, optional for
-Artifact Available]} \textit{Enumerate here the major claims (Cx) made in your
-paper. Follows an example:}\\
+The major claims made during this paper.\\
 
 \begin{compactdesc}
 
-    \item[(C1):] \textit{System\_name achieves the same accuracy of the state-of-the-art
-    systems for a task X while saving 2x storage resources. This is proven by
-    the experiment (E1) described in [refer to your paper's sections] whose
-    results are illustrated/reported in [refer to your paper's plots, tables,
-    sections or the sort].}
+    \item[(C1):] \textit{A virtual system with the hypervisor detection mitigations enabled is more transparent and the hypervisor is harder to detect from the user-space. 
+    This is proven in section~\ref{HV-detection-eval} by evaluating the designed mitigation system against third party tools that execute commonly used hypervisor detection techniques. 
+    The improvement can be seen in Figure~\ref{fig:test_accuracy}}
 
-    \item[(C2):] \textit{System\_name has been used to uncover new bugs in the Y
-    software. This is proven by the experiments (E2) and (E3) in [ibid].}
+    \item[(C2):] \textit{The designed system for Windows system call interception is more resilient than other approaches used by similar implementations like ScyllaHide. Section~\ref{scyllahide-comparison}
+    proves that intercepting system calls at the kernel level improves the resiliency of the mitigations. 
+    A process making a system call directly to the kernel bypasses the interception attempts in the design of ScyllaHide, but the system designed in this paper, in Section~\ref{syscall_interception} can still intercept it}
 
 \end{compactdesc}
 
 \subsubsection{Experiments}
-{\em [Mandatory for Artifacts Functional \& Results Reproduced, optional for
-Artifact Available]} \textit{Link explicitly the description of your experiments
-to the items you have provided in the previous subsection about Major Claims.
-Please provide your estimates of human- and compute-time for each of the listed
-experiments (using the suggested hardware/software configuration above). Follows
-an example:}
+\textit{The experiments performed for the evaluation of the designed transparency features. Corresponding to the major claims made in the previous section.
+For all of the experiments below, HyperDbg is deployed and running during them, with the transparency mode disabled, unless stated otherwise.}
 
 % use paralist for more compact list format: for more details check here:
 % https://texfaq.org/FAQ-complist
 \begin{compactdesc}
 
-    \item[(E1):] \textit{[Optional Name] [30 human-minutes + 1 compute-hour + 5GB disk]:
-    provide a short explanation of the experiment and expected results.}
+    \item[(E1):] \textit{Evasion efficiency:
+    The experiment consisted of running one of the 3 chosen hypervisor detection tool suites on the virtualized system running HyperDbg with the transparency mode disabled as well as enabled}
 
     \begin{asparadesc}
-        \item[How to:]  \textit{Describe thoroughly the steps to perform the
-        experiment and to collect and organize the results as expected from your
-        paper. We encourage you to use the following structure with three main
-        blocks for the description of your experiment.}
+        \item[How to:]  \textit{Once HyperDbg has been successfully deployed on the guest system, the detection suite is run on the guest. The result given by the tools vary, but all of them will contain 
+        a number of positive detections over the total count of detection methods performed. This score can then be logged and the transparency mode can be enabled. Once it is enabled, the same tool can be run again 
+        and the, now much smaller, score can also be logged and compared to the previous one.}
 
-        \item[Preparation:] \textit{Describe in this block the steps required to
-        prepare and configure the environment for this experiment.}
-
-        \item[Execution:]
-        \textit{Describe in this block the steps to run this experiment.}
-
-        \item[Results:] \textit{Describe in this block the steps required to
-        collect and interpret the results for this experiment.}
+        \item[Results:] \textit{The results should show a decrease in positive detections when they were performed with the transparency mode enabled. For a more clear comparison, the two percentage values can also
+        be plotted, as it can be seen in Figure~\ref{fig:test_accuracy}.}
     \end{asparadesc}
 
-    \item[(E2):] \textit{[Optional Name] [1 human-hour + 3 compute-hour]: ...}
+    \item[(E2):] \textit{Syscall interception:
+    For this experiment a custom program needs to be created that calls a specific Windows system call in two different ways and displays the return value.}
+
+    \begin{asparadesc}
+        \item[How to:]  \textit{This experiment requries the creation of a small program that calls the NtSystemDebugControl systemcall in two different ways, once by calling the NT API function of the same name
+        and then calling directly to the kernel by executing the SYSCALL assembly instruction like seen in Listing~\ref{lst:syscall-wrapper}.}
+        
+        \item[Preparation:]  \textit{To compare the design of the mitigations, ScyllaHide needs to be obtained from its source and made available to the guest system. The same goes for any debugging tool that can
+        can be used to attach itself to the process of the testing program. The aforementioned program also needs to be created and available.} 
+        
+        \item[Execution:]  \textit{Firstly, ScyllaHide can be deployed, by attaching its library to the process of the testing program, using the provided CLI. Then the debugger should also be attached to the same 
+        process. The system call test can then be executed, and after the returned values are shown, it should be noticeable  that ScyllaHide can only intercept the API based call and not the direct kernel system call.
+        After this the same process can be repeated without attaching ScyllaHide, but enabling the transparency mode in HyperDbg.}
+        
+        \item[Results:] \textit{The results should show ScyllaHide only intercepting and mitigating the first approach of the system call calling, while HyperDbg's transparency mode is able to intercept and mitigate both
+        calling approaches.}
+    \end{asparadesc}
 
     \item[(E3):] \textit{[Optional Name] [1 human-hour + 3 compute-hour]: ...}
 
 \end{compactdesc}
-
-\textit{In all of the above blocks, please provide indications about the
- expected outcome for each of the steps (given the suggested hardware/software
- configuration above).}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Notes on Reusability}
@@ -150,14 +138,12 @@ information on how to use your artifact beyond the research presented in your
 paper. In fact, a broader objective of an artifact evaluation is to help you
 make your research reusable by others.}
 
-\textit{You can include in this section any sort of instruction that you believe
-would help others re-use your artifact, like, for example, scaling down/up
-certain components of your artifact, working on different kinds of input or
-data-set, customizing the behavior replacing a specific module/algorithm, etc.}
-\textit{The hypervisor transparency features developed as part of this paper are only a small portion
+\textit{The hypervisor detection mitigation features, as implemented into HyperDbg, can allow more reliable dynamic malware analysis when using HyperDbg.}
+
+\textit{These features, developed as part of this paper, are only a small portion
 of the numerous ways that the presence of hypervisors can be detected. As with most cybersecurity development, 
 full security and protection cannot be guaranteed. The development was done in a highly modular and expandable fashion, 
-to allow future additions and improvements to hypervisor transparency in HyperDbg, as more mitigation methods are developed and new ways to detect hypervisors are discovered. }
+to allow future additions and improvements to hypervisor transparency in HyperDbg, as more mitigation methods are developed and new ways to detect hypervisors are discovered.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

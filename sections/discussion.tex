@@ -15,13 +15,18 @@ In this system, a select number of processes are allowed to bypass all transpare
 As a tradeoff, this semi-transparent mode would allow malware to more easily run successful hypervisor detections and avoid full analysis, by emulating the appearance of one 
 of these genuine, whitelisted processes.
 
+The system call interception of the mitigation design is based on filtering the system calls based on their system call numbers~\ref{tab:syscalls} and thus the mitigations 
+only work if deployed on a guest system that is running the correct Windows version, as Microsoft is known for changing the system call numbers between versions 
+frequently~\cite{j00ruSyscalls}. Within HyperDbg, obtaining the current Windows version of the guest is possible, but even then this requires having the 
+system call numbers of that specific version to be hard-coded into the hypervisor before.
+
 \subsection{Not Full Transparency}
 This paper only covered 3 general hypervisor detection vectors, there are numerous other ways any user-mode process could detect the virtualized environment, 
 and a fully transparent reliable hypervisor is nearly impossible to create. Deploying HyperDbg with the transparency features from this paper does not guarantee any true 
 transparency and it can remain stealthy if the malware or any other binary analyzed only uses the detection methods discussed in this paper.
 
 The implemented transparency features also leave detectable traces of their own and a process developed with HyperDbg in mind could find these 
-traces and still detect the virtualized environment of HyperDbg’s hypervisor. The remaining artifacts include inconsistent return values, memory buffers 
+traces and still detect the virtualized environment of HyperDbg's hypervisor. The remaining artifacts include inconsistent return values, memory buffers 
 that are not the correct size or inconsistencies between the same data obtained from different sources, like a system call which does not get intercepted by HyperDbg.
 
 

@@ -75,19 +75,23 @@ as well as any other logic executed in the handler functions.
 The time overhead introduced by intercepting the system calls can be measured by malware or any other process in a similar way to how the VM-exit overhead is measured~\ref{HV_detection}. 
 This is an issue that needs to be taken into consideration when the hypervisor detection methods are applied to malware analysis or any other process disassembly.
 
-\subsection{Hypervisor Detection}
+\subsection{Hypervisor Detection}\label{HV-detection-eval}
 For the evaluation of the efficiency of the developed hypervisor transparency system, HyperDbg with the transparency mode enabled was deployed against tools that perform many of 
 the common hypervisor and debugger detections tests. As a metric, the percentage of positive tests for each tool was measured and compared against running them on HyperDbg 
 without the mitigations enabled. These tests were also run on a bare metal system for a base level and false positive measurement. 
 Tools chosen for this evaluation were VMAware~\cite{vmaware}, Pafish~\cite{pafish} and Al-khaser~\cite{al-khaser}, all of them perform numerous known hypervisor and debugger detection methods, 
 most of which are also commonly used in malware. At the time of writing this paper, all 3 are still actively maintained and contain up to date detection methods.
 
+Firstly all of the tools were run on a bare metal machine to test for a base level and detect any false positives that might appear later on. 
+Both VMAware and Pafish had 0 positive detections, but Al-khaser showed 1 false positive detection for the Local Descriptor Table(LDT) location test, 
+so for the further tests in the virtualized environments, this test was disabled.
+
 Running the testing suites on a VMWare guest system with HyperDbg deployed, but without the transparent mitigations enabled, yielded a 16/111 positive detections or 14.41\%, 
-Pafish tested 9/58(15.52\%) positive and running Al-khaser resulted in 49/328 positive tests or 14.94, Figure~\ref{fig:test_accuracy}.
+Pafish tested 9/58(15.52\%) positive and running Al-khaser resulted in 48/327 positive tests or 14.67, Figure~\ref{fig:test_accuracy}.
 It should be noted that many of the tests from all three tools are checking for presence of common consumer virtual machine providers like VMWare and VirtualBox signatures, 
 so a lot of the tests performed use the same detection technique, just with different parameters, or searched strings, for these kinds of tests only the VMWare related ones could potentially get a positive score. 
 The transparency mode was then enabled and the same 3 hypervisor detection tools were run. VMAware positively detected only 10/111 (9.01\%) techniques, Pafish caught 6/58 (10.34\%) detection methods and 
-Al-khaser detected the hypervisor in 31 out of 328 attempts, which is 9.45\%, Figure~\ref{fig:test_accuracy}.
+Al-khaser detected the hypervisor in 30 out of 327 attempts, which is 9.17\%, Figure~\ref{fig:test_accuracy}.
 \begin{figure}[tbh]
     \includegraphics[width=\onecolgrid]{Accuracy tools} %RDTSC_execution
     \figcap{Percentage of positive detections from 3 hypervisor detection suites. \stress{"Enabled"} and \stress{"Disabled"} refer to the transparency mode of HyperDbg being enabled or not during the tests.}\label{fig:test_accuracy}
@@ -104,7 +108,7 @@ Evaluating the efficiency of the transparency features revealed the minimal inst
 could not be definitively identified, but it caused only rare system crashes, and could not be measured.
 
 
-\subsection{Comparison with ScyllaHide}
+\subsection{Comparison with ScyllaHide}\label{scyllahide-comparison}
 HyperDbg is not just a hypervisor, it is also a kernel-mode debugger~\cite{karvandi2022hyperdbg}. This means that during the design of 
 the hypervisor transparency features, mitigating debugger detections was also taken into consideration. The approach of intercepting Windows system calls 
 from the kernel-mode, allows HyperDbg to stay undetectable from any user-mode process. ScyllaHide is a tool for debugger detection mitigation~\cite{scyllahide}, 

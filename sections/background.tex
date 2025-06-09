@@ -7,9 +7,10 @@
 %%%Theory behind virtualization, that it can be detected. mention of the use in malware analysis
 
 Hypervisors work by adding an emulation layer between the guest system and the hardware. A type 1 hypervisor has to manage all hardware accesses a system needs, 
-that includes CPU cores, memory access and I/O operations. The virtual CPU, or vCPU, managed by the hypervisor, has each of its cores mapped or dynamically assigned 
-to the hardware CPU cores, I/O and storage is handled by creating custom drivers and mapping them to virtual devices that translate the I/O operations to the hardware 
-devices, and the memory is managed via Second Level Address Translation or SLAT. SLAT is a memory paging technology used to map guest system virtual addresses 
+that includes CPU cores, memory access and I/O operations. Hardware assisted virtualization features like Intel VT-x helps with this, greatly improving performance. 
+The virtual CPU, or vCPU of the virtualized system, has each of its cores mapped or dynamically assigned to the hardware CPU cores, 
+I/O and storage is handled by creating custom drivers and mapping them to virtual devices that translate the I/O operations to the hardware devices. 
+The memory is managed via Second Level Address Translation or SLAT. SLAT is a memory paging technology used to map guest system virtual addresses 
 into the physical memory. Modern implementations use hardware virtualization support to assist paging by adding more layers to the address translation, as well as 
 improve the overall performance and transparecy by moving a lot of the virtualization managment to the hardware. 
 Both AMD and Intel have their own implementations of SLAT, Nested Page Tables (NPT) and Extended Page Tables (EPT) respectively.
