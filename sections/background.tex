@@ -17,9 +17,9 @@ Both AMD and Intel have their own implementations of SLAT, Nested Page Tables (N
 These features allow the hypervisor to manage the memory in such a way that avoids massive software overheads and improves the guest systems performance 
 while still staying nearly undetectable. 
 
-The VMM runs on ring level -1 known as VMX root mode, while the guest software runs on lower privilege levels, 
-in VMX non-root mode. The transitions between non-root and root modes are called VM-exits and VM-entries, they transfer executing between the guest and the hypervisor. 
-VM-exits can be triggered conditionally, controlled by the hypervisor and can be changed, and unconditionally, by CPU instructions that will always cause a VM-exit. 
+The VMM operates in VMX root mode, while the guest system runs in VMX non-root mode, in normal execution only one mode is active at a time. 
+The transitions between non-root and root modes are called VM-exits and VM-entries, they transfer executing between the guest and the hypervisor. 
+VM-exits can be triggered conditionally, controlled by the hypervisor and can be changed, and unconditionally, by CPU instructions that will always cause a VM-exit if a hypervisor, using hardware assistance (VT-x), is present. 
 The hypervisor needs to handle all of the VM-exits to keep the guest system operational.
 
 

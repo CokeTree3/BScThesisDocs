@@ -1,15 +1,16 @@
 \section{Introduction}\label{s:intro}
 
 Modern malware is becoming increasingly more complex and advanced.
-And with its constantly changing internals, the ability to understand the inner workings and develop protections against it is an increasingly difficult task. 
+Its internals are constantly changing and so the ability to understand the inner workings and develop protections against it is an increasingly difficult task. 
 Compiled malware binaries are frequently obfuscated making static analysis hard, so dynamic analysis is preferred~\cite{Leon2021, 10.1145/2245276.2232070}. However, performing dynamic analysis requires a safe environment 
 to deploy the malware. One commonly used method for dynamic analysis and malware detection is to deploy the malware inside a virtual machine, a virtualized environment, managed by a virtual machine monitor, 
 commonly known as a hypervisor, that adds an abstraction layer over hardware, isolating the environment from direct hardware access and from any other environments running on the same bare metal system. 
 Modern virtualization relies on hardware level CPU architectures implemented by both Intel\textsuperscript{\tiny\textregistered} VT-x\texttrademark and AMD\textsuperscript{\tiny\textregistered} AMD-V\texttrademark. 
 These features allow automation of low level virtualization elements and a more direct access to the hardware from the virtualized environment, allowing levels of performance that make these environments usable.
 
-Virtualization and the use of hypervisors can be a really useful tool for process disassembly and analysis, as it allows kernel level view of the execution flow and direct access to the instructions that are executed on the CPU.
-Another benefit of this hypervisor assisted malware analysis is that hypervisors can operate externally, at a lower privilege level(level -1) than the guest operating system, 
+Virtualization and the use of hypervisors can be a really useful tool for process disassembly and analysis, as it allows kernel level view of the execution flow and direct access to certain instructions that are executed on the CPU, as well as almost full
+control of the virtual CPU.
+Another benefit of this hypervisor assisted malware analysis is that hypervisors can operate externally, at a lower privilege level(ring -1) than the guest operating system, 
 and system analysis at this level is by itself a lot more transparent and harder to detect from the user-space.
 
 But it is not impossible. There exist a lot of different methods any process operating at the user-space level can detect that the environment is virtualized. 
@@ -25,30 +26,30 @@ All of this data is in some way necessary or convenient, but for malware analysi
 From the hypervisor's point of view, attempts to detect its presence can also be detected. The low level position of hypervisors allows them to not just observe all execution happening on the guest system, 
 but also inject code into the guest and change its behavior. This allows mitigations to exist that can defeat most attempts at detecting the virtual environment.
 
-In this paper, hypervisor detection methods were researched and mitigations for these methods were designed within a hypervisor. To implement these hypervisor detection mitigation features, 
+In this thesis, hypervisor detection methods were researched and mitigations for these methods were designed within a hypervisor. To implement these hypervisor detection mitigation features, 
 a hypervisor based debugging tool HyperDbg was chosen as the platform. HyperDbg is a hypervisor based Windows debugging tool that provides kernel level debugging of a virtualized system which attempts to be as transparent to the guests as possible.
-While there are many different ways processes can detect the virtualized environment they are deployed in, the design developed in this paper only focused only on two general detection vectors, 
-CPU level instructions and structures, and guest OS kernel level system calls.
+While there are many different ways processes can detect the virtualized environment they are deployed in, the design developed in this thesis only focused only on two general detection vectors, 
+CPU level instructions and structures, and guest OS system calls.
 
 The mitigation techniques designed were implemented into HyperDbg's transparency mode. 
 These techniques were then tested against a selection of publicly available virtual machine detection tools that combine many of the common methods for detecting hypervisors into one program. 
 The overhead introduced by the implementation was also evaluated, measuring execution time with and without hypervisor transparency mode enabled, as well as evaluating the efficiency of the 
 designed system in evading detection attempts when compared to ScyllaHide~\cite{scyllahide}, an anti-anti-debugging tool, which features a similar implementation in evading debugger detection.
-The research of this paper is focused on the Microsoft Windows operating system, as at the time of writing this project, this was the only guest OS supported by HyperDbg.
+The research of this thesis is focused on the Microsoft Windows operating system, as at the time of writing this project, this was the only guest OS supported by HyperDbg.
 
-The contributions made in this paper are as follows.
+The contributions made in this thesis are as follows.
 
 \case{}
-Design of hypervisor detection mitigation features that obscure attempts at detecting the presence of a virtualized environment.
+Design of hypervisor and debugger detection mitigation features that obscure attempts at detecting the presence of a virtualized environment.
+
+\case{}
+Implementing a design of Windows system call interception that cannot be bypassed with direct system calls. 
 
 \case{}
 An evaluation on feasibility of these features at successfully hiding the hypervisor and evading anti-hypervisor detections.
 
 \case{}
-An implementation of these features into a hypervisor in a modular and dynamic transparency mode.
-
-\case{}
-Advancing the development of HyperDbg, a hypervisor based debugging tool, enhancing its transparency.
+An implementation of these features into an open-source hypervisor in a modular and dynamic transparency mode.
 
 
 %%% Local Variables:

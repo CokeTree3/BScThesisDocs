@@ -12,7 +12,7 @@ For the effectiveness evaluation, code snippets were created and implemented int
 and reported the result. These were used for both overhead analysis and for the comparison with ScyllaHide, which is also designed to spoof debugger presence.
 
 The evaluation was done on a bare metal system with an Intel CPU which supports VT-x, as well as in a nested virtualization environment running on the same bare metal system, 
-where the HyperDbg hypervisor driver was deployed over a VMWare Workstation 16 virtual machine. This VM as well as the host system were running Windows 10 version 22H2 as the operating system. 
+where the HyperDbg hypervisor driver was deployed over a VMWare Workstation 16 virtual machine. This VM as well as the host system were running Windows 11 version 24H2 as the operating system. 
 For reliability of the design, the testing was also performed on a virtual machine running Windows 11 version 24H2, 
 but this was done only for reliability testing and no further evaluation measurements were taken from this system configuration. 
 
@@ -21,7 +21,7 @@ To evaluate the performance impact of the hypervisor mitigations implemented in 
 The measurements were taken from a C++ user-space program that measured the time difference before and after executing a function that executed the evaluated hypervisor detection method. 
 Each detection method was tested 20 times, and to avoid any possible caching within the process, after each measurement the program was restarted. 
 These tests covered CPUID instruction querying as well as multiple system call executions. Due to the testing taking place in user-space, 
-MSR reads and writes could not be tested for their overhead due to MSR access being limited to privilege level 0~\cite[Volume 2B]{Intel-SDM2025}, and so could not be executed from user-space privilege level.
+MSR reads and writes could not be tested for their overhead due to MSR access being limited to privilege ring 0~\cite[Volume 2B]{Intel-SDM2025}, and so could not be executed from user-space privilege ring.
 The implementation of the mitigations involving MSR access is in a similar style to the CPUID related mitigations, so the overhead is believed to be comparable to CPUID measurements.
 The time data was collected with the C++ \stress{chrono} library, 
 using the \stress{high\_resolution\_clock} class\footnote{C++ chono library, high\_resolution\_clock class. \url{http://www.en.cppreference.com/w/cpp/chrono/high_resolution_clock.html}}.
@@ -80,7 +80,7 @@ For the evaluation of the efficiency of the developed hypervisor transparency sy
 the common hypervisor and debugger detections tests. As a metric, the percentage of positive tests for each tool was measured and compared against running them on HyperDbg 
 without the mitigations enabled. These tests were also run on a bare metal system for a base level and false positive measurement. 
 The tools chosen for this evaluation were VMAware~\cite{vmaware}, Pafish~\cite{pafish}, and Al-khaser~\cite{al-khaser}, all of them perform numerous known hypervisor and debugger detection methods, 
-most of which are also commonly used in malware. At the time of writing this paper, all 3 are still actively maintained and contain up-to-date detection methods.
+most of which are also commonly used in malware. At the time of writing this thesis, all 3 are still actively maintained and contain up-to-date detection methods.
 
 Firstly, all of the tools were run on a bare metal machine to test for a base level and detect any false positives that might appear later on. 
 Both VMAware and Pafish had 0 positive detections, but Al-khaser showed 1 false positive detection for the Local Descriptor Table(LDT) location test, 
@@ -98,8 +98,8 @@ Al-khaser detected the hypervisor in 30 out of 327 attempts, which is 9.17\%, Fi
 \end{figure}
 
 Overall, the hypervisor detection mitigation system designed during this project yielded a 37.47\%, 33.38\% and 36.75\% improvement in transparency, 
-with a 35.87\% overall average. These test suites primarily tested the system call approach to hypervisor detection and used many of the system calls that had handlers implemented as part of this paper, 
-all of these test methods were successfully mitigated. But since this paper only tackled a small number of Windows system calls, there were still some detection vectors that had not been intercepted, 
+with a 35.87\% overall average. These test suites primarily tested the system call approach to hypervisor detection and used many of the system calls that had handlers implemented as part of this thesis, 
+all of these test methods were successfully mitigated. But since this thesis only tackled a small number of Windows system calls, there were still some detection vectors that had not been intercepted, 
 as an example, the system firmware information available from reading a certain registry key\footnote{Information on firmware data available in the Windows registry. Microsoft. \url{https://learn.microsoft.com/en-us/windows-hardware/drivers/install/registry-trees-and-keys}} 
 or from NtQuerySystemInformation with the SystemFirmwareTableInformation class. This structure was chosen not to be intercepted, and so, 
 an attempt to read it from a virtualized system would still reveal hypervisor presence.
@@ -115,7 +115,7 @@ from the kernel-space allows HyperDbg to stay undetectable from any user-space p
 which stays in the user-space, and while it can mitigate most attempts at detecting a kernel-space debugger, ScyllaHide can only intercept API calls at the user-space level. 
 This could allow detection attempts to bypass ScyllaHide by calling specific Windows system calls directly, avoiding the NT API interception. 
 
-In the design proposed in this paper, the system call interception resides at the kernel level (level 0), with the mitigations performed at level -1, 
+In the design proposed in this thesis, the system call interception resides at the kernel level (ring 0), with the mitigations performed at ring -1, 
 so even the direct system call invocation would be mitigated. To test this, a simple C++ program was created that called a specific Windows system call, 
 NtSystemDebugControl. Firstly, using the NT API wrapper function with the same name and then directly, by emulating the API wrapper function.
 \begin{listing}[!ht]

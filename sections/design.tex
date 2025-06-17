@@ -7,7 +7,7 @@ These include return value adjustment of the CPUID instruction, behavior modific
 The implementation was done based on HyperDbg's 0.13.0 version, on a GitHub fork of the project\footnote{The repository of the forked HyperDbg project, where the implementation was done available at: \url{https://github.com/CokeTree3/HyperDbgThesis}}.
 
 The design was made to be deployable on any system, but the implementation and testing, and thus a guarantee of reliability, 
-was performed on a Windows 10(22H2) bare metal system running on an Intel CPU that supports VT-x hardware virtualization. 
+was performed on a Windows 11 (24H2) bare metal system running on an Intel CPU that supports VT-x hardware virtualization. 
 
 
 \subsection{Feature Design}
@@ -34,10 +34,10 @@ In a bare metal system, any access to an undefined MSR causes a general protecti
 so whenever the transparency mode is enabled within HyperDbg, any reads or writes to/from this range will cause a \stress{\#GP} error to be injected to the guest.
 
 \subsubsection{Windows system call interception}\label{syscall_interception}
-For the interception and modification of Windows system calls, the approach chosen was to insert an EPT page hook (A feature already implemented in HyperDbg before this paper) 
-at the entry point of the Windows system call handler function KiSystemCall64, which is the function that performs the privilege level swap between user-space and kernel-space. 
+For the interception and modification of Windows system calls, the approach chosen was to insert an EPT page hook (A feature already implemented in HyperDbg before this thesis\footnote{EPT hooks in HyperDbg. \url{https://docs.hyperdbg.org/commands/extension-commands/epthook}}) 
+at the entry point of the Windows system call handler function KiSystemCall64, which is the function that performs the privilege ring swap between user-space and kernel-space. 
 Access to the location of this function is obtained from the IA32\_LSTAR MSR. 
-This allows HyperDbg to intercept all calls to this function by causing an unconditional VM-exit and filter the system calls based on their system call number. 
+This allows HyperDbg to intercept all calls to this function by causing a VM-exit from an EPT violation, and filter the system calls based on their system call number. 
 The call number is stored in the RAX register as set up by the user-space system call wrapper functions in the \stress{NTDLL} library~\cite{ntdll-lib}. The general style of these 
 wrapper functions is as shown in Listing~\ref{lst:syscall-wrapper}, but with the system call number changed to the appropriate one.
 This disassembly also shows that the wrappers move the second argument of the system call, as defined by the x64 fastcall calling convention, 
@@ -46,9 +46,9 @@ to R10 from the standard RCX register. This was a detail that was considered dur
 At the point when the EPT hook is triggered, the system has just transferred the context to kernel-space and no execution relating to the requested system call has been done. 
 To get to a point in the execution path where data have been written to any memory buffers or the return values have already been set 
 requires returning control back to the guest system and intercepting the execution path once more, before the control is passed back to the calling user-space process or API function. 
-The approach chosen was to set the trap flag in the guest RFLAGS user-space register for the specific thread, which during the interception point is stored on R11. 
-Once the execution returns to the user-space via the SYSRET instruction, and the user-space RFLAGS are restored, the first instruction will immediately trigger a software interrupt due to the TRAP flag
-being set. HyperDbg catches this interrupt and gives an opportunity to access and modify the return value that the user-space process will be receiving from the system call. 
+The approach chosen was to set the trap flag in the guest RFLAGS user-space register for the specific thread, which during the interception point is stored on R11, moved there by the SYSCALL instruction~\cite[Volume 2B]{Intel-SDM2025}. 
+Once the execution returns to the user-space via the SYSRET instruction, and the user-space RFLAGS are restored, the first instruction will immediately trigger a single-step trap due to the TRAP flag
+being set. HyperDbg intercepts this and gives an opportunity to access and modify the return value that the user-space process will be receiving from the system call. 
 As many system calls also provide data, more than just a return value, at this point HyperDbg can also read and modify any memory buffers that were 
 passed as arguments when the system call was invoked. This callback approach to system call interception allows HyperDbg to filter and only intercept 
 the offending system calls, Table~\ref{tab:syscalls} and greatly improves performance over intercepting and causing VMX mode changes multiple times on every system call made.
@@ -71,7 +71,7 @@ another handler can be called for this callback. At this point in the execution 
 have been written to, if required, by the kernel. This allows the transparent mitigation handlers to read these buffers and modify any data in them 
 that could reveal hypervisor presence, such as removing active processes and loaded drivers from their respective lists 
 or spoofing the vendor identification in Windows registry key or firmware data.
-The mitigations take place in VMX root mode, operating at level -1 and since these pointers given in the arguments are from the calling processes (level 3) virtual address space, 
+The mitigations take place in VMX root mode, operating at ring -1 and since these pointers given in the arguments are from the calling processes (ring 3) virtual address space, 
 accessing them directly is not possible, so a translation layer needs to be added. The method chosen was to read and copy the data from the translated physical address to a spare memory buffer, 
 either on the stack or to an allocated non-paged memory on the heap. From there, modifications of the data in these buffers could be performed, as required based on the system call, 
 and then written back to the user-space buffer physical address.
@@ -124,10 +124,10 @@ Multiple hypervisor detection methods commonly used rely on querying for the sys
 allowing HyperDbg to intercept them. To appear genuine, when the transparency mode is enabled, a random genuine vendor is chosen from a preset list of numerous genuine computer system and component vendors. 
 Any queries for data through system calls that contain hypervisor vendor data, will always report back the same spoofed vendor data, bypassing any hypervisor checks done by the user process.
 
-In the context of Windows, one commonly used approach for obtaining system information is by using the Windows Management Instrumentation(WMI)\footnote{Windows Management Instrumentation documentation. Microsoft. \url{https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page}}.
+In the context of Windows, one commonly used approach for obtaining system information is by using the Windows Management Instrumentation (WMI)\footnote{Windows Management Instrumentation documentation. Microsoft. \url{https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page}}.
 This API provides the user with an interface through which to query and modify many aspects of the operating system. 
 Importantly, it can be used in parallel to direct system calls to obtain system information that might reveal the hypervisor~\cite{graeber2015abusing}.
-For this paper, WMI related detection methods did not have mitigations developed as the layout of the WMI structure is relatively spread out and 
+For this thesis, WMI related detection methods did not have mitigations developed as the layout of the WMI structure is relatively spread out and 
 does not interact with the kernel through an easily detectable system call, frequently not going through the kernel at all~\cite{wmi-structure}.
 
 \subsection{Final design}

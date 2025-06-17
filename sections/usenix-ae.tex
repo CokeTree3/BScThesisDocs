@@ -6,7 +6,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Abstract}
-{\em During this paper, multiple hypervisor detection mitigation approaches were discussed and designed. These mitigation methods were then implemented into HyperDbg, 
+{\em During this thesis, multiple hypervisor detection mitigation approaches were discussed and designed. These mitigation methods were then implemented into HyperDbg, 
 developing the transparency mode of HyperDbg. The transparency features attempt to hide the HyperDbg hypervisor and any other virtualized environment HyperDbg has been nested on top of, 
 by intercepting and modifying the data a calling user process will receive and are deployed from HyperDbg during runtime without requiring system reboot.}
 
@@ -14,16 +14,16 @@ by intercepting and modifying the data a calling user process will receive and a
 \subsection{Description \& Requirements}
 
 \textit{Both the development and evaluation of the hypervisor detection technique mitigation methods were carried out
-on a Microsoft Windows 10 22H2 bare metal system as the host system, with a 10th generation Intel Core\textsuperscript{TM} CPU which supports VT-x hardware virtualization feature.
+on a Microsoft Windows 11 24H2 bare metal system as the host system, with a 10th generation Intel Core\textsuperscript{TM} CPU which supports VT-x hardware virtualization feature.
 The virtualized guest system was run on this host using a VMWare Workstation 16 hypervisor with nested virtualization support enabled.
 This guest system was used to run HyperDbg's hypervisor and perform all evaluation and testing. The development of the transparency features in HyperDbg was based on its 0.13.0 release version. }
 
 \subsubsection{Security, privacy, and ethical concerns}
 \textit{The containerized nature of virtual machines adds a layer of security to a bare metal system that is used as the host for malware analysis.
-During this project, no actual malware samples were tested, only non-malicious parts of them, so full host system safety cannot be guaranteed from this paper.
+During this project, no actual malware samples were tested, only non-malicious parts of them, so full host system safety cannot be guaranteed from this thesis.
 To be able to run HyperDbg's hypervisor, Windows Driver Signature Enforcement security feature as well as VBS(Virtualization Based Security) must be disabled on the guest system.
 This allows the loading of unsigned drivers, which HyperDbg's hypervisor driver is, but it also allows any other process to load their unsafe drivers, 
-exposing the system to a much lower level and harder to detect malware attacks. HyperDbg itself, including the features implemented as part of this paper, are open source and available under the GNU GPL v3.0 copyleft license.}
+exposing the system to a much lower level and harder to detect malware attacks. HyperDbg itself, including the features implemented as part of this thesis, are open source and available under the GNU GPL v3.0 copyleft license.}
 
 \subsubsection{How to access}
 \textit{Access to the developed transparency features is freely available on GitHub, as part of the HyperDbg project~\cite{hyperdbg}. 
@@ -34,13 +34,13 @@ transparency \href{https://github.com/HyperDbg/HyperDbg/commit/d0610661baf944259
 
 
 \subsubsection{Hardware dependencies}
-\textit{To be able to evaluate the hypervisor transparency features implemented as part of this paper.
-The system running the hypervisor driver must have an Intel x64 CPU which supports VT-x and EPT technologies. As of writing this paper, AMD CPUs are not supported.
+\textit{To be able to evaluate the hypervisor transparency features implemented as part of this thesis.
+The system running the hypervisor driver must have an Intel x64 CPU which supports VT-x and EPT technologies. As of writing this thesis, AMD CPUs are not supported.
 Both the host and guest systems should also have at least a serial port each that are connected together, this can be a physical connection or a virtual one in case of nested virtualization usage.}
 
 \subsubsection{Software dependencies}
 \textit{Both the host and guest systems must be running the 64 bit version of Microsoft Windows operating system,
-a certain release version is not specified, but testing was done, and correct operations can only be guaranteed, on Windows 10 and 11.
+a certain release version is not specified, but testing was done, and correct operations can only be guaranteed, on Windows 11, with most of the functionality also remaining in Windows 10.
 HyperDbg can be obtained as a compiled software, so no compilation is needed. To be able to load the hypervisor driver of HyperDbg,
 Driver Signature Enforcement feature needs to be disabled, one of the methods, and the one that was used during the evaluation section, involves the use of a third party tool WinDbg \href{https://github.com/HyperDbg/HyperDbg/commit/2cc3da3daebd793fd56d5c370ef6da398efa6d29}{Link}, but this is not required.}
 
@@ -51,7 +51,7 @@ Driver Signature Enforcement feature needs to be disabled, one of the methods, a
 \subsection{Set-up}
 
 \textit{For this example evaluation, the nested virtualization approach is chosen, in this case the guest system on which the evaluation will be performed,
-is a VMWare Workstation 16 virtual machine running Microsoft Windows 10 22H2. This is assumed to already be set up and in a working state. The precompiled HyperDbg package was used.}
+is a VMWare Workstation 16 virtual machine running Microsoft Windows 11 24H2. This is assumed to already be set up and in a working state. The precompiled HyperDbg package was used.}
 
 \subsubsection{Installation}
 \textit{To deploy the transparency features, only the guest VMWare system and HyperDbg is needed. The downloaded compiled HyperDbg package directory needs to be present on both the guest and host systems. 
@@ -67,14 +67,9 @@ will receive the mitigated output.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Evaluation workflow}
-\textit{This section should include all the operational
-steps and experiments which must be performed to evaluate if your your artifact is
-functional and to validate your paper's key results and claims. For that
-purpose, we ask you to use the two following subsections and cross-reference the
-items therein as explained next.}
 
 \subsubsection{Major Claims}
-The major claims made during this paper.\\
+The major claims made during this thesis.\\
 
 \begin{compactdesc}
 
@@ -84,7 +79,7 @@ The major claims made during this paper.\\
 
     \item[(C2):] \textit{The designed system for Windows system call interception is more resilient than other approaches used by similar implementations like ScyllaHide. Section~\ref{scyllahide-comparison}
     proves that intercepting system calls at the kernel level improves the resiliency of the mitigations. 
-    A process making a system call directly to the kernel bypasses the interception attempts in the design of ScyllaHide, but the system designed in this paper, in Section~\ref{syscall_interception} can still intercept it}
+    A process making a system call directly to the kernel bypasses the interception attempts in the design of ScyllaHide, but the system designed in this thesis, in Section~\ref{syscall_interception} can still intercept it}
 
 \end{compactdesc}
 
@@ -133,14 +128,10 @@ For all of the experiments below, HyperDbg is deployed in kernel debug mode and 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Notes on Reusability}
 \label{sec:reuse}
-\textit{This section is meant to optionally share additional
-information on how to use your artifact beyond the research presented in your
-paper. In fact, a broader objective of an artifact evaluation is to help you
-make your research reusable by others.}
 
 \textit{The hypervisor detection mitigation features, as implemented into HyperDbg, can allow more reliable dynamic malware analysis when using HyperDbg.}
 
-\textit{These features, developed as part of this paper, are only a small portion
+\textit{These features, developed as part of this thesis, are only a small portion
 of the numerous ways that the presence of hypervisors can be detected. As with most cybersecurity development, 
 full security and protection cannot be guaranteed. The development was done in a highly modular and expandable fashion, 
 to allow future additions and improvements to hypervisor transparency in HyperDbg, as more mitigation methods are developed and new ways to detect hypervisors are discovered.}
