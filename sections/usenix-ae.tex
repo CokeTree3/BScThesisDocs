@@ -21,7 +21,7 @@ This guest system was used to run HyperDbg's hypervisor and perform all evaluati
 \subsubsection{Security, privacy, and ethical concerns}
 \textit{The containerized nature of virtual machines adds a layer of security to a bare metal system that is used as the host for malware analysis.
 During this project, no actual malware samples were tested, only non-malicious parts of them, so full host system safety cannot be guaranteed from this thesis.
-To be able to run HyperDbg's hypervisor, Windows Driver Signature Enforcement security feature as well as VBS(Virtualization Based Security) must be disabled on the guest system.
+To be able to run HyperDbg's hypervisor, Windows Driver Signature Enforcement security feature as well as VBS (Virtualization Based Security) must be disabled on the guest system.
 This allows the loading of unsigned drivers, which HyperDbg's hypervisor driver is, but it also allows any other process to load their unsafe drivers, 
 exposing the system to a much lower level and harder to detect malware attacks. HyperDbg itself, including the features implemented as part of this thesis, are open source and available under the GNU GPL v3.0 copyleft license.}
 
@@ -120,8 +120,6 @@ For all of the experiments below, HyperDbg is deployed in kernel debug mode and 
         \item[Results:] \textit{The results should show ScyllaHide only intercepting and mitigating the first approach of the system call calling, while HyperDbg's transparency mode is able to intercept and mitigate both
         calling approaches.}
     \end{asparadesc}
-
-    \item[(E3):] \textit{[Optional Name] [1 human-hour + 3 compute-hour]: ...}
 
 \end{compactdesc}
 

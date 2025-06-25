@@ -6,7 +6,7 @@ and debuggers can be detected into one program and executes them all one by one,
 ScyllaHide~\cite{scyllahide}, an anti-anti-debugging library that applies 
 a similar style of transparency to debugger detection.
 
-The evaluation also included overhead analysis, measuring the added time overhead introduced by the transparent mitigations.
+The evaluation also included overhead analysis, measuring the latency introduced by the transparent mitigations.
 
 For the effectiveness evaluation, code snippets were created and implemented into small console programs that executed a specific hypervisor detection technique 
 and reported the result. These were used for both overhead analysis and for the comparison with ScyllaHide, which is also designed to spoof debugger presence.
@@ -60,7 +60,7 @@ for a query of a registry key that would contain hypervisor specific data in its
 Here the change in execution time is not as large, only 746\% versus the 1240\% increase for NtSystemDebugControl, but the average execution time is a lot longer, in general.
 
 Interestingly, the execution of NtQuerySystemInformation, with a query for the SystemProcessInformation class, reveals less overhead that the other system calls, 
-with only a 70\% increase. The lack of more noticeable overhead is because the mitigation for this specific query(\stress{SystemProcessInformation}) 
+with only a 70\% increase. The lack of more noticeable overhead is because the mitigation for this specific query (\stress{SystemProcessInformation}) 
 only requires reading and modifying a user-space memory buffer after the kernel has executed the SYSRET instruction. In contrast, mitigations for NtQueryKeyValue 
 also require reading a user-space buffer before the kernel execution, to check the name of the registry key queried. 
 The reason for the longer average execution time on the bare metal system is the increased active process count when the tests were performed, increasing the write times in the kernel.
@@ -83,11 +83,11 @@ The tools chosen for this evaluation were VMAware~\cite{vmaware}, Pafish~\cite{p
 most of which are also commonly used in malware. At the time of writing this thesis, all 3 are still actively maintained and contain up-to-date detection methods.
 
 Firstly, all of the tools were run on a bare metal machine to test for a base level and detect any false positives that might appear later on. 
-Both VMAware and Pafish had 0 positive detections, but Al-khaser showed 1 false positive detection for the Local Descriptor Table(LDT) location test, 
+Both VMAware and Pafish had 0 positive detections, but Al-khaser showed 1 false positive detection for the Local Descriptor Table (LDT) location test, 
 so for the further tests in the virtualized environments, this test was disabled.
 
 Running the testing suites on a VMWare guest system with HyperDbg deployed, but without the transparent mitigations enabled, yielded 16/111 positive detections or 14.41\%, 
-Pafish tested 9/58(15.52\%) positive and running Al-khaser resulted in 48/327 positive tests or 14.67, Figure~\ref{fig:test_accuracy}.
+Pafish tested 9/58 (15.52\%) positive and running Al-khaser resulted in 48/327 positive tests or 14.67, Figure~\ref{fig:test_accuracy}.
 It should be noted that many of the tests from all three tools are checking for presence of common consumer virtual machine providers like VMWare and VirtualBox signatures, 
 so a lot of the tests performed use the same detection technique, just with different parameters, or searched strings, for these kinds of tests only the VMWare related ones could potentially get a positive score. 
 The transparency mode was then enabled, and the same 3 hypervisor detection tools were run. VMAware positively detected only 10/111 (9.01\%) techniques, Pafish caught 6/58 (10.34\%) detection methods, and 

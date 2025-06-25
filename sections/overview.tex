@@ -36,7 +36,7 @@ As seen in Figure~\ref{fig:rdtsc_overhead}, the CPU cycle count reuired to execu
 It is also visible that HyperDbg's implementation of the CPUID instruction handler or the general VM-exit handler is a lot less efficient than VMWare's implementation, as the cycle count overhead is over 5 times larger. 
 This detection method is reliable, as the overhead measurements are done in cycle count not time offset, and it is hard to defeat from the hypervisor, as many genuine processes rely on the RDTSC 
 instruction and the detection is done as a pattern not a singular query, making detecting the attempt of hypervisor detection unreliable and hard to implement~\cite{hypervisor-detection-timing-attacks}. 
-The viability of this detection method, however, is no longer that high. In recent Windows operating system releases Microsoft has introduced Virtualization Based Security(VBS) feature~\cite{windows-vbs} 
+The viability of this detection method, however, is no longer that high. In recent Windows operating system releases Microsoft has introduced Virtualization Based Security (VBS) feature~\cite{windows-vbs} 
 that runs the operating system on top of a light hypervisor. This feature is enabled by default on modern Windows systems and introduces almost the same cycle count overhead, Figure~\ref{fig:rdtsc_overhead}. 
 Malware that wants to target as many systems as it can or bypass this security feature would have to sacrifice using the aforementioned detection method as it would blacklist and not deploy on not just the virtualized systems used for its analysis, 
 but most bare metal systems as well. It should be noted that the overhead is smaller than that of the other hypervisors tested, but the difference is small, and differentiating them would be less reliable from the detection point of view.
@@ -122,7 +122,7 @@ Due to the complexity of the mitigations for some of these detection methods and
 The hypervisor detection mitigation features were implemented into HyperDbg's transparency mode. 
 
 By default, when HyperDbg is deployed, this feature, and thus the ability to hide any hypervisors from detection, is disabled. To deploy the transparent mitigations, 
-once HyperDbg is connected in kernel debug mode, \texttt{!hide} command needs to be entered. This enables all hypervisor detection mitigations that were implemented as part of this thesis and, 
+once HyperDbg is connected in kernel debug mode, \textbf{\texttt{!hide}} command needs to be entered. This enables all hypervisor detection mitigations that were implemented as part of this thesis and, 
 as it will be shown in the Evaluation section, improves the stealthiness of the hypervisors present. An overview of the deployment of the transparent mitigations with HyperDbg can be seen in Figure~\ref{fig:hyperdbg_overview}.
 
 \begin{figure*}[t]

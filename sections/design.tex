@@ -71,7 +71,7 @@ another handler can be called for this callback. At this point in the execution 
 have been written to, if required, by the kernel. This allows the transparent mitigation handlers to read these buffers and modify any data in them 
 that could reveal hypervisor presence, such as removing active processes and loaded drivers from their respective lists 
 or spoofing the vendor identification in Windows registry key or firmware data.
-The mitigations take place in VMX root mode, operating at ring -1 and since these pointers given in the arguments are from the calling processes (ring 3) virtual address space, 
+The mitigations take place in VMX root mode and since these pointers given in the arguments are from the calling processes virtual address space, 
 accessing them directly is not possible, so a translation layer needs to be added. The method chosen was to read and copy the data from the translated physical address to a spare memory buffer, 
 either on the stack or to an allocated non-paged memory on the heap. From there, modifications of the data in these buffers could be performed, as required based on the system call, 
 and then written back to the user-space buffer physical address.
