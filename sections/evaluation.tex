@@ -1,12 +1,12 @@
 \section{Evaluation}\label{s:evaluation}
 
-After the detection mitigation features were implemented in HyperDbg, the effectiveness of them was tested. The evaluation of the chosen design was tested in three 
+After the detection mitigation features were implemented in HyperDbg, their effectiveness was tested. The evaluation of the chosen design was tested in three 
 different approaches. The effectiveness of the transparency was tested against publicly available, maintained tools that compile the numerous ways hypervisors 
-and debuggers can be detected into one program and executes them all one by one, as well as comparing the interception approach of Windows system calls to 
+and debuggers can be detected into one program and execute them all one by one. The interception approach of Windows system calls was compared to 
 ScyllaHide~\cite{scyllahide}, an anti-anti-debugging library that applies 
 a similar style of transparency to debugger detection.
 
-The evaluation also included overhead analysis, measuring the latency introduced by the transparent mitigations.
+The evaluation also includes overhead analysis, measuring the latency introduced by the transparent mitigations.
 
 For the effectiveness evaluation, code snippets were created and implemented into small console programs that executed a specific hypervisor detection technique 
 and reported the result. These were used for both overhead analysis and for the comparison with ScyllaHide, which is also designed to spoof debugger presence.
@@ -31,7 +31,7 @@ VMWare environment with the HyperDbg hypervisor deployed over it, both with and 
 As it can be seen in Figure~\ref{fig:cpuid_exec_time} executing the CPUID instruction with the mitigations enabled, as expected, did not cause noticeable time overhead. 
 This is due to the fact that mitigations for this detection method do not add any additional code to the hypervisor and other than changing the returned value, the execution path does not change.
 The overhead introduced by virtualization in the execution time is discussed in section~\ref{HV_detection}.
-\begin{figure}[tbh]
+\begin{figure}[tbp]
     \includegraphics[width=\onecolgrid]{CPUID execution} %RDTSC_execution
     \figcap{Execution time of the CPUID instruction in different environments. HyperDbg is shortened to \stress{HDBG}, and the data for the detection mitigation transparency mode is labeled as \stress{Transparent}.}\label{fig:cpuid_exec_time}
 \end{figure}
@@ -57,7 +57,7 @@ the measurements were taken for the NtSystemDebugControl system call.
 This is used by Microsoft debuggers, but can also be used to detect them, including HyperDbg. The transparency mode intercepts this call 
 and changes its return value to an error code. A large increase in overhead can also be seen for the NtQueryKeyValue system call~\ref{fig:exec-time-a}, 
 for a query of a registry key that would contain hypervisor specific data in its value, if it is read on a virtualized system.
-Here the change in execution time is not as large, only 746\% versus the 1240\% increase for NtSystemDebugControl, but the average execution time is a lot longer, in general.
+Here the change in execution time is not as large, only 746\% versus the 1240\% increase for NtSystemDebugControl, but the average execution time considerably longer, in general.
 
 Interestingly, the execution of NtQuerySystemInformation, with a query for the SystemProcessInformation class, reveals less overhead that the other system calls, 
 with only a 70\% increase. The lack of more noticeable overhead is because the mitigation for this specific query (\stress{SystemProcessInformation}) 
@@ -89,10 +89,10 @@ so for the further tests in the virtualized environments, this test was disabled
 Running the testing suites on a VMWare guest system with HyperDbg deployed, but without the transparent mitigations enabled, yielded 16/111 positive detections or 14.41\%, 
 Pafish tested 9/58 (15.52\%) positive and running Al-khaser resulted in 48/327 positive tests or 14.67, Figure~\ref{fig:test_accuracy}.
 It should be noted that many of the tests from all three tools are checking for presence of common consumer virtual machine providers like VMWare and VirtualBox signatures, 
-so a lot of the tests performed use the same detection technique, just with different parameters, or searched strings, for these kinds of tests only the VMWare related ones could potentially get a positive score. 
+so many of the tests performed use the same detection technique, just with different parameters, or searched strings. For these kinds of tests only the VMWare related ones could potentially get a positive score. 
 The transparency mode was then enabled, and the same 3 hypervisor detection tools were run. VMAware positively detected only 10/111 (9.01\%) techniques, Pafish caught 6/58 (10.34\%) detection methods, and 
 Al-khaser detected the hypervisor in 30 out of 327 attempts, which is 9.17\%, Figure~\ref{fig:test_accuracy}.
-\begin{figure}[tbh]
+\begin{figure}[tbp]
     \includegraphics[width=\onecolgrid]{Accuracy tools} %RDTSC_execution
     \figcap{Percentage of positive detections from 3 hypervisor detection suites. \stress{"Enabled"} and \stress{"Disabled"} refer to the transparency mode of HyperDbg being enabled or not during the tests.}\label{fig:test_accuracy}
 \end{figure}
@@ -111,14 +111,14 @@ could not be definitively identified, but it caused only rare system crashes, an
 \subsection{Comparison with ScyllaHide}\label{scyllahide-comparison}
 HyperDbg is not just a hypervisor, it is also a kernel-space debugger~\cite{karvandi2022hyperdbg}. This means that during the design of 
 the hypervisor transparency features, mitigating debugger detections was also taken into consideration. The approach of intercepting Windows system calls 
-from the kernel-space allows HyperDbg to stay undetectable from any user-space process. ScyllaHide is a tool for debugger detection mitigation~\cite{scyllahide}, 
+from the kernel space allows HyperDbg to stay undetectable from any user-space process. ScyllaHide is a tool for debugger detection mitigation~\cite{scyllahide}, 
 which stays in the user-space, and while it can mitigate most attempts at detecting a kernel-space debugger, ScyllaHide can only intercept API calls at the user-space level. 
 This could allow detection attempts to bypass ScyllaHide by calling specific Windows system calls directly, avoiding the NT API interception. 
 
-In the design proposed in this thesis, the system call interception resides at the kernel level (ring 0), with the mitigations performed at ring -1, 
+In the design proposed in this thesis, the system call interception resides at the kernel level (ring 0), with the mitigations performed in VMX root mode, 
 so even the direct system call invocation would be mitigated. To test this, a simple C++ program was created that called a specific Windows system call, 
 NtSystemDebugControl. Firstly, using the NT API wrapper function with the same name and then directly, by emulating the API wrapper function.
-\begin{listing}[!ht]
+\begin{listing}[!tbp]
 
 \begin{minted}[linenos,frame=single]{nasm}
     MOV R10, RCX

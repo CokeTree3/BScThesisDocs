@@ -9,7 +9,7 @@
 The implemented detection mitigations are system wide; this provides the best level of transparency, even in the case of an attempt 
 to perform these detection checks on a different process. The downside of this approach is that it will also interfere with normal, 
 genuine processes that expect certain data or values to be present, like the VM support programs many commercial hypervisor vendors use, 
-which might store crucial data in locations blocked by these transparency features, as well as Windows processes that expect no kernel modifications. 
+which might store crucial data in locations blocked by these transparency features. As well as Windows processes that expect no kernel modifications. 
 As an addition to the transparency mode in HyperDbg, a two stage transparency, with a semi-transparent mode added, would improve the usability and reliability of the hypervisor. 
 In this system, a select number of processes are allowed to bypass all transparent mitigations as well as not intercepting the MSR accesses that could cause instability. 
 As a trade-off, this semi-transparent mode would allow malware to more easily run successful hypervisor detections and avoid full analysis, by emulating the appearance of one 

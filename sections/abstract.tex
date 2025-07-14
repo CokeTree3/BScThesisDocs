@@ -1,10 +1,10 @@
-Dynamic analysis of malware is commonly performed in a virtualized environment, managed by a hypervisor. 
+Dynamic analysis of malware commonly uses a virtualized environment, managed by a hypervisor.
 This keeps it isolated from hardware and the analysis can stay hidden and detached from the system. But the hypervisor is not completely hidden and malware using anti hypervisor 
 detection methods can still detect the virtual environment and evade analysis and detection. 
 
 In this thesis we look into the hypervisor detection methods malware use as well as design mitigations for them.  
 We then integrate these mitigations into a transparency mode in HyperDbg, a debugging tool based on a hypervisor. With these mitigation features in HyperDbg, 
-we evaluate the effectiveness of them by deploying them against multiple hypervisor detection tools that compile numerous detection methods used by malware and execute them, 
+we evaluate their effectiveness by deploying them against multiple hypervisor detection tools that compile numerous detection methods used by malware and execute them, 
 attempting to detect a hypervisor. We show that, while perfect transparency is not achieved, there is a noticeable improvement in hypervisor transparency.
 
 
