@@ -4,7 +4,7 @@
 In this thesis, we have discussed the many ways of detecting the presence of hypervisors on the running system from a user-space process, 
 the use and prevalence of these detection methods in malware, as well as designed mitigations for these detections that can be added to any hypervisor to make it more transparent and stealthy. 
 By intercepting requests for data that are known to contain information revealing hypervisor presence, like certain CPU instructions or system calls of the operating system, 
-and modifying the data the calling user-space process receives, it is possible to hide the presence of any hypervisors on the system. 
+and then modifying the data the calling user-space process receives, it is possible to hide the presence of any hypervisors on the system. 
 These hypervisor transparency features were then implemented into HyperDbg, a hypervisor based debugging tool, and the effectiveness of the mitigations was 
 tested against the hypervisor detection attempts using tools that compile these detection methods and perform tests with all of them. By evaluating the designed mitigations, 
 it was shown that enabling the transparency mode in HyperDbg not only improved the stealthiness of HyperDbg, the underlying hypervisor on which HyperDbg was nested on top also 

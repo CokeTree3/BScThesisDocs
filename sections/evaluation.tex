@@ -57,7 +57,7 @@ the measurements were taken for the NtSystemDebugControl system call.
 This is used by Microsoft debuggers, but can also be used to detect them, including HyperDbg. The transparency mode intercepts this call 
 and changes its return value to an error code. A large increase in overhead can also be seen for the NtQueryKeyValue system call~\ref{fig:exec-time-a}, 
 for a query of a registry key that would contain hypervisor specific data in its value, if it is read on a virtualized system.
-Here the change in execution time is not as large, only 746\% versus the 1240\% increase for NtSystemDebugControl, but the average execution time considerably longer, in general.
+Here the change in execution time is not as large, only 746\% versus the 1240\% increase for NtSystemDebugControl, but the average execution time is considerably longer, in general.
 
 Interestingly, the execution of NtQuerySystemInformation, with a query for the SystemProcessInformation class, reveals less overhead that the other system calls, 
 with only a 70\% increase. The lack of more noticeable overhead is because the mitigation for this specific query (\stress{SystemProcessInformation}) 
@@ -97,10 +97,10 @@ Al-khaser detected the hypervisor in 30 out of 327 attempts, which is 9.17\%, Fi
     \figcap{Percentage of positive detections from 3 hypervisor detection suites. \stress{"Enabled"} and \stress{"Disabled"} refer to the transparency mode of HyperDbg being enabled or not during the tests.}\label{fig:test_accuracy}
 \end{figure}
 
-Overall, the hypervisor detection mitigation system designed during this project yielded a 37.47\%, 33.38\% and 36.75\% improvement in transparency, 
+Overall, the hypervisor detection mitigation system designed during this project yields a 37.47\%, 33.38\% and 36.75\% improvement in transparency, 
 with a 35.87\% overall average. These test suites primarily tested the system call approach to hypervisor detection and used many of the system calls that had handlers implemented as part of this thesis, 
-all of these test methods were successfully mitigated. But since this thesis only tackled a small number of Windows system calls, there were still some detection vectors that had not been intercepted, 
-as an example, the system firmware information available from reading a certain registry key\footnote{Information on firmware data available in the Windows registry. Microsoft. \url{https://learn.microsoft.com/en-us/windows-hardware/drivers/install/registry-trees-and-keys}} 
+all of these test methods were successfully mitigated. But since this thesis only tackled a small number of Windows system calls, there were still some detection vectors that had not been intercepted. 
+As an example, the system firmware information available from reading a certain registry key\footnote{Information on firmware data available in the Windows registry. Microsoft. \url{https://learn.microsoft.com/en-us/windows-hardware/drivers/install/registry-trees-and-keys}} 
 or from NtQuerySystemInformation with the SystemFirmwareTableInformation class. This structure was chosen not to be intercepted, and so, 
 an attempt to read it from a virtualized system would still reveal hypervisor presence.
 

@@ -10,7 +10,7 @@ These mitigation features were also designed to be deployable on any system, but
 was performed on a Windows 11 (24H2) bare metal system running on an Intel CPU that supports VT-x hardware virtualization. 
 
 \begin{figure}[tbh]
-    \includegraphics[width=\onecolgrid]{SysDiag1}
+    \includegraphics[width=\onecolgrid]{SysDiag}
     \figcap{Design of the hypervisor detection mitigations}\label{fig:feature_diagram}
 \end{figure}
 
@@ -21,12 +21,12 @@ project\footnote{The repository of the forked HyperDbg project, where the implem
 \subsection{Feature Design}
 \subsubsection{CPUID}
 As described by Microsoft\footnote{CPUID instruction description in terms of hypervisor discovery. Microsoft \url{https://learn.microsoft.com/en-us/virtualization/hyper-v-on-windows/tlfs/feature-discovery}}, 
-there are two ways the CPUID instruction can be used to check hypervisor presence, reading the “hypervisor present” bit which is at the 31 bit offset of leaf 0x1, that is, the instruction queried with the EAX register set to this value.
+there are two ways the CPUID instruction can be used to check hypervisor presence. One approach involves reading the “hypervisor present” bit which is at the 31 bit offset of leaf 0x1, that is, the return value of the instruction when queried with the EAX register set to this value.
 \begin{minted}[linenos,frame=single]{nasm}
     MOV EAX, 0x1
     CPUID
 \end{minted} 
-Or by querying the 0x40000000 leaf for the vendor identifier and max defined leaf range above the 0x40000000 leaf. 
+The other approach requires querying the 0x40000000 leaf for the vendor identifier and max defined leaf range above the 0x40000000 leaf. 
 \begin{minted}[linenos,frame=single]{nasm}
     MOV EAX, 0x40000000
     CPUID
@@ -47,7 +47,7 @@ at the entry point of the Windows system call handler function KiSystemCall64. T
 Access to the location of this function is obtained from the IA32\_LSTAR MSR. 
 This allows HyperDbg to intercept all calls to this function by causing a VM-exit from an EPT violation, and filter the system calls based on their system call number. 
 The call number is stored in the RAX register as set up by the user-space system call wrapper functions in the \stress{NTDLL} library~\cite{ntdll-lib}. The general style of these 
-wrapper functions is as shown in Listing~\ref{lst:syscall-wrapper}, but with the system call number changed to the appropriate one.
+wrapper functions are as shown in Listing~\ref{lst:syscall-wrapper}, but with the system call number changed to the appropriate one.
 This disassembly also shows that the wrappers move the second argument of the system call, as defined by the x64 fastcall calling convention, 
 to R10 from the standard RCX register. This was a detail that was considered during the development.
 

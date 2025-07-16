@@ -5,13 +5,13 @@ Its internals are constantly changing and so the ability to understand the inner
 Compiled malware binaries are frequently obfuscated, making static analysis hard, so dynamic analysis is preferred~\cite{Leon2021, 10.1145/2245276.2232070}. However, performing dynamic analysis requires a safe environment 
 to deploy the malware. One commonly used method for dynamic analysis and malware detection is to deploy the malware inside a virtual machine, a virtualized environment, managed by a virtual machine monitor (VMM),
 commonly known as a hypervisor. This adds an abstraction layer over hardware, isolating the environment from direct hardware access and from any other environments running on the same bare metal system. 
-Modern virtualization relies on hardware level CPU instruction set extentions implemented by both Intel\textsuperscript{\tiny\textregistered} VT-x\texttrademark and AMD\textsuperscript{\tiny\textregistered} AMD-V\texttrademark. 
+Modern virtualization relies on hardware level CPU instruction set extensions implemented by both Intel\textsuperscript{\tiny\textregistered} VT-x\texttrademark and AMD\textsuperscript{\tiny\textregistered} AMD-V\texttrademark. 
 These features allow automation of low-level virtualization elements and a more direct access to the hardware from the virtualized environment, allowing levels of performance that make these environments usable.
 
 Virtualization and the use of hypervisors is a useful tool for process disassembly and analysis, as it allows kernel-level view of the execution flow and direct access to certain instructions that are executed on the CPU, as well as almost full
 control of the virtual CPU.
-Another benefit of this hypervisor-assisted malware analysis is that hypervisors can operate externally, at a lower privilege level than the guest operating system, refered by Intel as VMX root mode~\cite{Intel-SDM2025}.
-System analysis at this privilege level, sometimes refered to as ring level -1,  is by itself considerably more transparent and harder to detect from the user space.
+Another benefit of this hypervisor-assisted malware analysis is that hypervisors can operate externally, at a lower privilege level than the guest operating system, referred to by Intel as VMX root mode~\cite{Intel-SDM2025}.
+System analysis at this privilege level, sometimes referred to as ring level -1,  is by itself considerably more transparent and harder to detect from the user space.
 
 But it is not impossible. There exist many different methods any process operating at the user-space level can detect that the environment is virtualized. 
 Some detection methods involve specific CPU instruction and feature tests, some use precise timing data between events, and others might use the register and memory access patterns. 

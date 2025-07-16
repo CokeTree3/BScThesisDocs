@@ -19,7 +19,7 @@ A transparent hypervisor can be set up to pass through the instruction to the lo
 \parai{RDTSC}
 Another x86 instruction that causes an unconditional VM-exit in a virtualized environment is the RDTSC instruction. This instruction reads and returns the value of the time stamp counter, 
 a register that counts the CPU cycles since its reset. Its use in hypervisor detection is also common, as it allows the detection of timing anomalies introduced by the aforementioned VM-exits 
-and other transitions between non-root and root modes~\cite{hyperdbg-transparency}. This instruction can be called twice, before and after another instruction that causes a VM-exit, like CPUID, to obtain an aproximate CPU
+and other transitions between non-root and root modes~\cite{hyperdbg-transparency}. This instruction can be called twice, before and after another instruction that causes a VM-exit, like CPUID, to obtain an approximate CPU
 cycle count this instruction took to execute. Subtracting values returned by the RDTSC instructions would show detectable overhead as the mode transitions, as well as the hypervisor itself, 
 will execute more instructions and spend more CPU cycles than executing the same code in a bare metal system. 
 As seen in Figure~\ref{fig:rdtsc_overhead}, the CPU cycle count required to execute the CPUID instruction is much larger when run in a VMWare virtualized environment than on bare metal. 
@@ -52,7 +52,7 @@ Although these mitigations themselves try to stay hidden from the caller process
 some intervention was performed; this will be discussed in more detail in Section~\ref{syscall_interception}.
 For these mitigations, some system calls only require changing the return value, while others need intercepting pointers to user-allocated buffers from the system call arguments and modifying the data inside these memory addresses.
 The main issue with the use of system calls in hypervisor detection is that they are bound to a single operating system, and in the case of Windows possibly to a single version, as Microsoft tends to change the system call numbers over versions.
-This version limitation, however, can be bypassed by using Windows API function calls for the wrapper functions of the system calls, but this approach is considerably more easier to mitigate and can even be done in user space, without a need for hypervisor intervention.
+This version limitation, however, can be bypassed by using Windows API function calls for the wrapper functions of the system calls, but this approach is considerably easier to mitigate and can even be done in user space, without a need for hypervisor intervention.
 However, the mitigations themselves could also be bypassed if they were implemented in user space, as will be shown in Section~\ref{scyllahide-comparison}.
 
 \begin{table}[tb]
